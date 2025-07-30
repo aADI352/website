@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="blogstyle.css" /> 
+        <title>adi's website</title>
+        <script>
+          var texheight = 1;
+        </script>
+            <!--katex-->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+
+              <!-- The loading of KaTeX is deferred to speed up page rendering -->
+              <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+
+              <!-- To automatically render math in text elements, include the auto-render extension: -->
+              <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
+                  onload="renderMathInElement(document.body);"></script>
+    </head>
+
+
+  
+
+
+      <body>
+       <div id= "header">
+				<h1 class="nametl"><a href="../index.html"> Adi Atrash</a><h1>
+                    <img class="avatar" src="../1713938565415.jpg" alt="profile picture of adi atrash"> 
+                    <a href="Blogindex.html" class="abt">Blog </a>
+				<a href="../about.html" class="abt">About </a>
+				
+			</div>
+
+      <main></main>
+
+        <div class="mainhw">
+              <h1>Tsiolkovsky's rocket equation</h1>
+              <br>
+              <b>2024-10-09 17:00:46</b>
+              <br>
+              <br>
+                  <p id="explanation">I have always known that this equation existed, however I had 0 idea where it came
+                    from.<br>
+                    a few months ago I was practicing physics problems for an interview that I had. one of the problems I came across was: <br>
+                    \[\textbf{ Find the amount of fuel needed for a rocket of mass $m$}\\ \textbf{ to escape earth's gravity.}\]<br>
+                    I started solving the problem, it was hard at first but eventually I was was able to solve it. When I arrived at the solution
+                    I felt that it was oddly familiar. I looked at it and then it struck me.. it was Tsiolkovsky's rocket equation! now the
+                    equation makes sense!! <br><br>here is the full explanation:  </p><br>
+
+                <div id="latexelements">
+
+                  \[
+                    \text{We assume the initial velocity to be $v_i$ , and final velocity to be $v_f$.}\\
+                    
+                    \text{we consider two timeframes: $t$ and $t+ Δt$} 
+                    
+               
+                  \]
+                  <div id="imgg">
+                    <img class="img-inline  problem-img" src="https://firebasestorage.googleapis.com/v0/b/iwtse-1928f.appspot.com/o/rocket.png?alt=media&amp;token=c831432d-428f-4e11-b5bd-4378b77d4586" style="background-color: white; margin-left: auto; margin-right: auto; padding: 0.75rem; margin-bottom: 1.5rem; border-radius: 0.3rem; max-width: 100%;">
+                  </div>
+
+                  \[
+                   \text{if we consider that at time $t$ the rocket is moving at velocity $v$ and has mass $m$, we }\\ 
+                   \text{can then infer that at time $t = t+Δt$ the rocket has velcoty $v+Δv$, mass $m+Δm$}  \\
+                   \text{ and the fuel it expelled from the back has mass $-Δm$, and velocity $(-v_p+(v+Δv))$}\\
+                   \text{where $v_p$ is the velocity at which propellant is expelled. } \]
+                   <br>
+
+                   \[
+                   \text{using the law of conservation of momentum:}\\[0.5em]
+                   m*v = (m+  \Delta m)(v +  \Delta v) + (-  \Delta m)(-v_p+(v +  \Delta v))\\[1.5em]
+
+                   \text{expanding the brackets we get:}\\[0.5em]
+                   m*v = mv + m \Delta v + \Delta m v+ \Delta m \Delta v - (-\Delta m v_p) - \Delta m  v - \Delta m \Delta v \\[1.5em]
+
+                   ~rearranging~we~get: \\[0.5em]
+                    m \Delta v - \Delta m v_p = 0 \rightarrow	 m \Delta v = -\Delta m v_p\\[0.5em]
+                   \frac{\Delta m}{m}=\frac{\Delta v}{-v_p}\\[1.5em]
+
+                   \text{instead of writing Δ which usually signifies a large change, we can just use $d$ which} \\[0.5em]
+                   \text{ signifies a change where Δ→0. we use separation of variables to get:}\\[0.5em]
+                   
+                   \int_{m_i}^{m_f} \frac{\mathrm{d}m}{m} =  \int_{v_i}^{v_f}\frac{\mathrm{d}v}{-v_p}\\[0.5em]
+                   \left. \ln(m) \right|_{m_i}^{m_f} = \frac{1}{-v_p} *\left.v \right|_{v_i}^{v_f}\\[0.5em]
+                   \ln(m_f)-\ln(m_i)= \frac{\Delta v}{-v_p} \rightarrow \, \, \ln(m_i) - \ln(m_f)= \frac{\Delta v}{v_p}\\[0.5em]
+                   \boldsymbol {\Delta v=v_p*\ln(\frac{m_i}{m_f})}\\[1.5em]
+                   \]
+
+                   \[\textbf{there we go, this is Tsiolkovsky's rocket equation which is actually so simple}\\[1.5em]
+
+                   \text{now to find how much fuel we need to escape earths gravity, we should have the mass}\\
+                    \text{ of the rocket ($m_i$), the velocity at which propellant is expelled ($v_p$) and we only}\\[0.5em]
+                     \text{ need to plug in the escape velocity. to find that :-}\\[1em]
+                  
+                   E_g = -\frac{Gm_em}{r},\, E_k = \frac{1}{2}mv^2\\[0.5em]
+                   \text{when we escape earths gravitational field, $E_g = 0$ and $v=v_e$ and the initial conditions are : }\\[0.5em]
+                   \text{$r=r_e$ (earth's radius) and $v=0$.}\\[0.5em] \text{it now becomes a trivial matter of conservation of energy:}\\[0.5em]
+
+                   \frac{1}{2}mv^2=\frac{Gm_em}{r_e}\\[0.5em]
+
+                   \text{rearranging for $v_e$:}\\[0.5em]
+                   v_e = \sqrt{\frac{2Gm_e}{r_e}}\\[0.5em]
+
+                   \text{plugging this result into the rocket equation to get that}\\[0.5em]
+                   e^{\frac{\sqrt{\frac{2Gm_e}{r_e}}}{v_p}}=\frac{m_i}{m_f}\\[0.5em]
+
+                   \text{if we have $m_i$ then we can then easily find $m_f$. then if we substract $m_f$ from $m_i$ we get the total}\\[0.5em] \text{mass of the fuel.}
+                   
+
+
+                   
+                   
+                   \]
+                </div>
+                
+           
+          
+          </div>
+      </main>
+      <div id="nav">
+        <ul>
+          <li><a href="https://x.com/AtrashAdi"> <span>twitter</span></a></li>
+          <li><a href="https://www.linkedin.com/in/adi-atrash-6857b1197/"> <span>linkedin</span></a></li>
+          <li><a href="mailto:atrashadi@gmail.com"> <span> Email</span></a></li>
+          <li><a href="mailto:adi.atrash@campus.technion.ac.il"><span>University Email</span></a></li>
+          <li><a href="../Courses.html"><span> Courses & modules</span></a></li>
+        </ul>
+      </div>
+    
+    <div id= "footer">
+         &copy; 2024 adi atrash 
+    </div>
+      </body>
+
+      
+  </html>
