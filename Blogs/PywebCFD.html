@@ -16,7 +16,46 @@
 				
 			</div>
 			
-        
+      <div class="mainhw">
+            <div class="top">
+                <h1>PywebCFD</h1>
+                <br>
+                <b>2025-07-29 20:28:34</b>
+                <br>
+                <br>
+                <p>
+                    During the shift to online learning imposed by the geopolitical situation, I found myself with 
+                    a lot of free time. so I decided to experienment with CFD solvers, and that led me to the creation of PywebCFD, my first ever web-based interactive FDM CFD solver.<br><br>
+                    A little background, PywebCFD is a <i>Finite Difference Method (FDM)</i> solver that numerically solves the flow equations, specifically oprimised for incompressible flows. 
+                    it is built using python (witb an HTML web interface).<br><br>
+                    the main challenge for me as a first year undergraduate students, was to polish my understanding of the flow equations, and then 
+                    finish them by learning how to solve them numerically. initially I was aiming to use the <i>Lattice Boltzmann Method (LBM)</i>, 
+                    as I believed that they are more efficient for a web-hosted solver. however, I found tuning the model to be 
+                    especially challenging, I am still working on that so any new meaningful progress will be posted.<br><br>
+                    for the time being, I am using the FDM method, which is a lot more intuitive and easier to implement. its main issue is 
+                    performance, as it is quite diffuicult to run fine grid simulations on a web server, with multiple users at the same time. My solution was to limit 
+                    the solver to a largely coarse grid, limiting initial parameters and playing with relaxation parameters to ensure stability.<br><br>
+                    One last issue I faced was data visulisation, I wanted to be able to visualise the flow field in a way smooth manner that didnt kill performance. after lots 
+                    of experienmentation I found that using the matplotlib library to generate a static image of the flow field, and then updating frequently 
+                  enough was a surprisingly good solution.  <br><br>
+                My objectives for the forseeible future: <br><br>
+              1. Ditch FDM altogether. the lattice Bolzmann method is more efficient (albeit usually less accurate). Still cracking this one—any suggestions are welcome! <br><br>
+
+2. Implementing force monitors and improving accuracy.<br><br>
+
+3. Compressible flow ? :)))))))  <br><br>
+
+you can try it out (you need to have lots of patience though) in <a href="https://pywebfdm.replit.app/"> this link</a>
+
+</p>
+
+<div class="image-grid">
+    <img src="https://media.licdn.com/dms/image/v2/D4D22AQGp4u4t-cNfJA/feedshare-shrink_2048_1536/B4DZeR8tMJGsAo-/0/1750500300842?e=1756944000&v=beta&t=S8EhMEbwNmNoxTcIJgcdVcPH1w0s04OYj4seKEJ68-w" alt="screenshot of the pywebCFD solver">
+    <img src="https://media.licdn.com/dms/image/v2/D4D22AQGOzCvlfyPXsA/feedshare-shrink_800/B4DZeR8tMnGsAg-/0/1750500301146?e=1756944000&v=beta&t=gasg2CFhhC2RKTYPoWxWqeQa7cJBcDYfBbvMKdQlyYM" alt="screenshot of the pywebCFD solver">
+    <img src="https://media.licdn.com/dms/image/v2/D4D22AQFXKxpa5h_knQ/feedshare-shrink_800/B4DZeR8tL5HAAg-/0/1750500300332?e=1756944000&v=beta&t=bDx89IVcaBZ6QBhlOTGlRTZWiSaekxSw6OxyLgRHimo" alt="screenshot of the pywebCFD solver">
+    <img src="https://media.licdn.com/dms/image/v2/D4D22AQHCvhIv7u_CNA/feedshare-shrink_800/B4DZeR8tMxG8Ag-/0/1750500300651?e=1756944000&v=beta&t=5EttkLRzljo4a0XFE_8BIDQOJI4TMfq4g45MC0Lysf0" alt="screenshot of the pywebCFD solver">
+</div>
+            </div>
       
 
         </div>
@@ -33,6 +72,47 @@
         <div id= "footer">
              &copy; 2024 adi atrash 
         </div>
+
+        <!-- Modal for image popup -->
+        <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+        </div>
+
+        <script>
+            // Get modal elements
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const closeBtn = document.getElementsByClassName('close')[0];
+
+            // Add click event to all images in the grid
+            document.querySelectorAll('.image-grid img').forEach(img => {
+                img.addEventListener('click', function() {
+                    modal.style.display = 'block';
+                    modalImg.src = this.src;
+                    modalImg.alt = this.alt;
+                });
+            });
+
+            // Close modal when clicking the X
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside the image
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                }
+            });
+        </script>
 
     </body>
     
