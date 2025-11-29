@@ -28,7 +28,7 @@
                     a lot of free time. so I decided to experienment with CFD solvers, and that led me to the creation of PywebCFD, my first ever web-based interactive FDM CFD solver.<br><br>
                     A little background, PywebCFD is a <i>Finite Difference Method (FDM)</i> solver that numerically solves the flow equations, specifically oprimised for incompressible flows. 
                     it is built using python (witb an HTML web interface).<br><br>
-                    the main challenge for me as a first year undergraduate students, was to polish my understanding of the flow equations, and then 
+                    the main challenge for me as a first year undergraduate student, was to polish my understanding of the flow equations, and then 
                     finish them by learning how to solve them numerically. initially I was aiming to use the <i>Lattice Boltzmann Method (LBM)</i>, 
                     as I believed that they are more efficient for a web-hosted solver. however, I found tuning the model to be 
                     especially challenging, I am still working on that so any new meaningful progress will be posted.<br><br>
@@ -39,21 +39,23 @@
                     of experienmentation I found that using the matplotlib library to generate a static image of the flow field, and then updating frequently 
                   enough was a surprisingly good solution.  <br><br>
                 My objectives for the forseeible future: <br><br>
-              1. Ditch FDM altogether. the lattice Bolzmann method is more efficient (albeit usually less accurate). Still cracking this one—any suggestions are welcome! <br><br>
+              1. switch to a segregated solver, with seperate pressure and velocity solvers.<br><br>
+              2. Ditch FDM altogether. the lattice Bolzmann method is more efficient (albeit usually less accurate). Still cracking this one—any suggestions are welcome! <br><br>
 
-2. Implementing force monitors and improving accuracy.<br><br>
+3. Implementing force monitors and improving accuracy / stability<br><br>
 
-3. Compressible flow ? :)))))))  <br><br>
+<br><br>
 
-you can try it out (you need to have lots of patience though) in <a href="https://pywebfdm.replit.app/"> this link</a>
+you can try it out (you need to have lots of patience though) in <a href="https://pywebfdm.replit.app/"> this link</a> </br>
+update : I stopped hosting it, contact me for src code. 
 
 </p>
 
 <div class="image-grid">
-    <img src="https://media.licdn.com/dms/image/v2/D4D22AQGp4u4t-cNfJA/feedshare-shrink_2048_1536/B4DZeR8tMJGsAo-/0/1750500300842?e=1756944000&v=beta&t=S8EhMEbwNmNoxTcIJgcdVcPH1w0s04OYj4seKEJ68-w" alt="screenshot of the pywebCFD solver">
-    <img src="https://media.licdn.com/dms/image/v2/D4D22AQGOzCvlfyPXsA/feedshare-shrink_800/B4DZeR8tMnGsAg-/0/1750500301146?e=1756944000&v=beta&t=gasg2CFhhC2RKTYPoWxWqeQa7cJBcDYfBbvMKdQlyYM" alt="screenshot of the pywebCFD solver">
-    <img src="https://media.licdn.com/dms/image/v2/D4D22AQFXKxpa5h_knQ/feedshare-shrink_800/B4DZeR8tL5HAAg-/0/1750500300332?e=1756944000&v=beta&t=bDx89IVcaBZ6QBhlOTGlRTZWiSaekxSw6OxyLgRHimo" alt="screenshot of the pywebCFD solver">
-    <img src="https://media.licdn.com/dms/image/v2/D4D22AQHCvhIv7u_CNA/feedshare-shrink_800/B4DZeR8tMxG8Ag-/0/1750500300651?e=1756944000&v=beta&t=5EttkLRzljo4a0XFE_8BIDQOJI4TMfq4g45MC0Lysf0" alt="screenshot of the pywebCFD solver">
+    <img src="src/1750500300332.jpg" alt="screenshot of the pywebCFD solver">
+    <img src="src/1750500300680.jpg" alt="screenshot of the pywebCFD solver">
+    <img src="src/1750500300812.jpg" alt="screenshot of the pywebCFD solver">
+    <img src="src/1750500301227.jpg" alt="screenshot of the pywebCFD solver">
 </div>
             </div>
       
