@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" type="text/css" href="blogstyle.css">
+        <title>Seven Minutes of Terror - Adi Atrash</title>
+
+        <!-- KaTeX -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"
+            onload="renderMathInElement(document.body);"></script>
+
+        <style>
+            .media-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 24px;
+                margin: 30px 0;
+            }
+            .media-grid img {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .media-grid img:hover {
+                transform: scale(1.01);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            }
+            .media-grid video {
+                width: 100%;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: #000;
+            }
+            .media-caption {
+                font-size: 1.2rem;
+                color: var(--text-muted);
+                text-align: center;
+                margin-top: 6px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="header">
+            <h1 class="nametl"><a href="../index.html">Adi Atrash</a></h1>
+            <img class="avatar" src="../1713938565415.jpg" alt="profile picture of adi atrash">
+            <a href="../about.html" class="abt">About</a>
+            <a href="Blogindex.html" class="abt">Blog</a>
+        </div>
+
+        <div class="mainhw">
+            <div class="top">
+                <h1> The seven minutes of terror - simulating mars reentry"</h1>
+                <br>
+                <b>2026-03-04 12:34:36</b>
+                <br><br>
+
+                <p>
+                    If you've ever watched footage of the Curiosity rover landing on Mars, you've probably seen the mission control room erupt the moment they confirmed touchdown. What they were celebrating wasn't just a landing - it was the autonomous execution of the most complex entry, descent and landing sequence ever attempted, all in about seven minutes, with no ability to intervene from Earth due to the 14-minute signal travel time. Every single thing had to work perfectly, in sequence, with no margin for error.
+                    <br><br>
+                    I've found that quite fascinating, and since I'm stuck at home, I decided to build a physics-based EDL trajectory simulator from scratch in Python. This post walks through the physics.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What is EDL?</h2>
+                <p>
+                    EDL stands for Entry, Descent and Landing. The entry interface - the point where the atmosphere becomes meaningful - is defined at 125 km altitude for Mars. At that altitude, the vehicle hits the atmosphere at roughly 5.9 km/s. There's no thrust, no active guidance during the heating phase, just the heat shield absorbing the energy that would otherwise vaporise the vehicle.
+                    <br><br>
+                    The sequence for MSL (the Curiosity mission) goes: hypersonic entry - peak heating - Max-Q - parachute deployment at ~15 km - powered descent - skycrane - touchdown. My simulator covers the first phase - entry interface down to parachute deployment - since the physics are completely different once the heat shield is jettisoned.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Reference frame and equations of motion</h2>
+                <p>
+                    The simulation uses a rotating polar coordinate frame fixed to Mars. The state vector has five components:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        \mathbf{s} = \begin{bmatrix} r \\ \theta \\ \dot{r} \\ r\dot{\theta} \\ m_{hs} \end{bmatrix}
+                    \]
+                </div>
+
+                <p>
+                    where \(r\) is the radial distance from Mars' centre, \(\theta\) is the downrange angle, \(\dot{r}\) and \(r\dot{\theta}\) are the radial and tangential velocity components, and \(m_{hs}\) is the remaining heat-shield mass.
+                    <br><br>
+                    Working in a rotating frame means you pick up Coriolis and centrifugal terms. The complete first-order ODE system that the integrator solves is:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        \begin{aligned}
+                            \dot{r}       &= v_r \\[0.4em]
+                            \dot{\theta}  &= \dfrac{v_\theta}{r} \\[0.8em]
+                            \dot{v}_r     &= \dfrac{v_\theta^2}{r} - \dfrac{\mu}{r^2} + \dfrac{F_{D,r}}{m} + 2\Omega v_\theta + \Omega^2 r \\[0.8em]
+                            \dot{v}_\theta &= -\dfrac{v_r v_\theta}{r} + \dfrac{F_{D,\theta}}{m} - 2\Omega v_r \\[0.8em]
+                            \dot{m}_{hs}  &= -\dfrac{\dot{q}_s \cdot A_{\mathrm{ref}}}{H_{\mathrm{abl}}}
+                        \end{aligned}
+                    \]
+                </div>
+
+                <p>
+                    The first two equations are pure kinematics - they translate the state variables into rates of change of position. The \(\dot{v}_r\) and \(\dot{v}_\theta\) equations are the dynamics: centripetal acceleration (\(v_\theta^2/r\)), gravity (\(-\mu/r^2\)), aerodynamic drag components, Coriolis (\(2\Omega v_\theta\), \(-2\Omega v_r\)), and centrifugal (\(\Omega^2 r\)) terms from the rotating frame. The last equation couples the aerothermal environment back into the vehicle mass, making the system non-conservative.
+                    <br><br>
+                    For Mars, \(\Omega = 7.088 \times 10^{-5}\) rad/s. The Coriolis and centrifugal terms are small compared to drag and gravity, but at entry velocities they do accumulate over the trajectory.
+                    <br><br>
+                    The aerodynamic drag force magnitude is:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        F_D = C_D \cdot A_{ref} \cdot q_\infty = C_D \cdot A_{ref} \cdot \frac{1}{2}\rho v^2
+                    \]
+                </div>
+
+                <p>
+                    with components applied antiparallel to the velocity vector.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Atmosphere model</h2>
+                <p>
+                    I'm using an exponential atmosphere - a simplified version of the Justus-Braun Mars atmospheric model that works reasonably well over the altitude range we care about:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        \rho(h) = \rho_0 \, e^{-h/H}
+                    \]
+                </div>
+
+                <p>
+                    with \(\rho_0 = 0.020\) kg/m³ (surface density) and \(H = 11{,}100\) m (scale height). Mars' atmosphere is about 95% CO₂ and roughly 1% as dense as Earth's at the surface, which is exactly why you need to be going so fast to have enough aerodynamic authority to decelerate - and also why the parachute alone isn't enough and you need the powered descent stage.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Aerodynamic heating - Sutton-Graves</h2>
+                <p>
+                    This is the scary part. The stagnation-point heat flux is calculated using the Sutton-Graves relation:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        \dot{q}_s = k \sqrt{\frac{\rho}{R_n}} \, v^3
+                    \]
+                </div>
+
+                <p>
+                    where \(k = 1.9027 \times 10^{-4}\) is the Sutton-Graves constant for a CO₂ atmosphere, \(R_n\) is the nose radius of the heat shield, and \(v\) is the velocity magnitude. The \(v^3\) dependence is what makes reentry heating so extreme - double the velocity and you get eight times the heat flux.
+                    <br><br>
+                    The relation comes from boundary layer similarity theory for a blunt body in a high-enthalpy flow. It's an empirical correlation, so it has limitations - it doesn't account for radiative heating, non-equilibrium gas effects, or ablation products in the boundary layer - but for first-order trajectory simulation it's standard practice.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Heat shield ablation</h2>
+                <p>
+                    The heat shield (PICA - Phenolic Impregnated Carbon Ablator) doesn't just reflect or re-radiate the heat flux - it actively ablates. Material is pyrolysed and ejected into the boundary layer, which actually helps cool the surface by carrying energy away. The mass loss rate comes from a simple energy balance at the stagnation point:
+                </p>
+
+                <div id="latexelements">
+                    \[
+                        \dot{m}_{hs} = -\frac{\dot{q}_s \cdot A_{ref}}{H_{abl}}
+                    \]
+                </div>
+
+                <p>
+                    where \(H_{abl} = 1.5 \times 10^7\) J/kg is the effective ablation enthalpy of PICA. The ablating mass feeds back into the total vehicle mass and therefore the deceleration - the vehicle is getting lighter as it slows down.
+                    <br><br>
+                    There is a counterintuitive result buried in the coupling between \(\dot{q}_s\) and \(\dot{m}_{hs}\): a higher drag coefficient actually reduces total ablation. The mechanism is straightforward. Higher \(C_D\) means more drag force per unit dynamic pressure, so the vehicle decelerates more aggressively - but it does so at higher altitude, where the atmosphere is exponentially thinner. Peak heat flux occurs where \(\rho v^3\) is maximised; if most of the deceleration happens earlier (higher \(h\), lower \(\rho\)), the vehicle arrives at the density-rich lower atmosphere already slow, so the \(v^3\) term is far smaller by the time \(\rho\) is large enough to matter. The net result is a lower peak \(\dot{q}_s\) and less integrated heat load, despite the vehicle spending more time in the atmosphere. This is part of why blunt-body aeroshells with high \(C_D\) are thermally favourable - the aerodynamic inefficiency is a feature, not a bug.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Numerical integration</h2>
+                <p>
+                    The ODE system is integrated with <code>scipy.integrate.solve_ivp</code> using the RK45 adaptive step-size method (Dormand-Prince), with two terminal events:
+                    <br><br>
+                    1. Ground impact: \(r = R_{Mars} + 10\) m<br>
+                    2. Parachute deployment: \(v &lt; 400\) m/s at \(h &lt; 15\) km (roughly Mach 2 on Mars)
+                    <br><br>
+                    Tolerances are set to \(10^{-8}\) (relative) and \(10^{-9}\) (absolute) to keep trajectory errors negligible. The adaptive step control means the solver automatically takes smaller steps through the high-heating, high-deceleration phase and larger steps at the beginning where the dynamics are slower.
+                </p>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What the simulation shows</h2>
+                <p>
+                    The entry phase captures a few things that are easy to derive from the equations but still satisfying to see come out of the simulation. Velocity drops almost entirely due to aerodynamic drag - gravity barely contributes. The stagnation heat flux peaks at intermediate altitude, where the product \(\rho v^3\) is maximised; at high altitude the density is too low, and at low altitude the vehicle has slowed enough that the cubic velocity term dominates. The axial deceleration peak coincides roughly with peak dynamic pressure (Max-Q), which is the most structurally demanding point of the flight.
+                    <br><br>
+                    The heat shield ablation is concentrated in a narrow altitude band around peak heating and drops off sharply as the vehicle decelerates. The simulation terminates at parachute deployment conditions.
+                    <br><br>
+                    The 9-panel summary and the animated trajectory are below. Entry conditions and key outputs are in the summary panel (bottom right of the figure).
+                </p>
+
+                <div class="media-grid">
+                    <div>
+                        <img src="src/mars_edl_simulation.png" alt="9-panel Mars EDL trajectory simulation summary">
+                        <p class="media-caption">click me</p>
+                    </div>
+                    <div>
+                        <video controls preload="metadata">
+                            <source src="src/mars_edl_animation.mp4" type="video/mp4">
+                        </video>
+                        <p class="media-caption">Animated trajectory - velocity-coloured ground track with live telemetry</p>
+                    </div>
+                </div>
+
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What's missing</h2>
+                <p>
+                    The atmosphere model is simplified. A proper simulation would use a tabulated atmosphere (MarsGRAM or similar) accounting for seasonal and latitudinal density variations, and a full thermochemical non-equilibrium heating model rather than the Sutton-Graves correlation.
+                    <br><br>
+                    The simulation also only covers the hypersonic entry phase. Modelling the rest of EDL would need a completely different drag model for the parachute, a guidance and control loop for the powered descent, and six degrees of freedom instead of three. That's a project for another time.
+                    <br><br>
+                    The code is on my <a href="https://github.com/aADI352/mars_EDL.git">GitHub</a>.
+                </p>
+
+            </div>
+        </div>
+
+        <div id="nav">
+            <ul>
+                <li><a href="https://x.com/AtrashAdi"><span>twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/adi-atrash-6857b1197/"><span>linkedin</span></a></li>
+                <li><a href="../Courses.html"><span>Courses &amp; modules</span></a></li>
+                <li><a href="../resume.html"><span>Resume</span></a></li>
+            </ul>
+        </div>
+
+        <div id="footer">&copy; 2026 Adi Atrash</div>
+
+        <!-- Modal for image lightbox -->
+        <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+        </div>
+
+        <script>
+            const modal    = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const closeBtn = document.getElementsByClassName('close')[0];
+
+            document.querySelectorAll('.media-grid img').forEach(img => {
+                img.addEventListener('click', function () {
+                    modal.style.display = 'block';
+                    modalImg.src = this.src;
+                    modalImg.alt = this.alt;
+                });
+            });
+
+            closeBtn.addEventListener('click', () => modal.style.display = 'none');
+            modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && modal.style.display === 'block') modal.style.display = 'none';
+            });
+        </script>
+
+    </body>
+</html>
