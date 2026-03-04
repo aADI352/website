@@ -43,6 +43,114 @@
                 text-align: center;
                 margin-top: 6px;
             }
+            /* Data tables */
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 1.5rem 0;
+                font-size: 0.95rem;
+                font-family: inherit;
+            }
+            .data-table th {
+                background: var(--bg-secondary, #f5f5f5);
+                padding: 10px 14px;
+                text-align: left;
+                font-weight: 600;
+                border: 1px solid var(--border, #ddd);
+            }
+            .data-table td {
+                padding: 9px 14px;
+                border: 1px solid var(--border, #ddd);
+                vertical-align: top;
+            }
+            .data-table tr:nth-child(even) td {
+                background: var(--bg-secondary, #fafafa);
+            }
+            code {
+                font-family: 'SFMono-Regular', Consolas, monospace;
+                font-size: 0.88em;
+                background: var(--bg-secondary, #f4f4f4);
+                padding: 2px 5px;
+                border-radius: 3px;
+            }
+            .result-highlight {
+                background: var(--bg-secondary, #f8f8f8);
+                border-left: 3px solid var(--accent, #555);
+                padding: 1rem 1.25rem;
+                margin: 1.5rem 0;
+                border-radius: 0 4px 4px 0;
+            }
+            /* TOC */
+            .toc {
+                background: var(--bg-secondary, #f8f8f8);
+                border: 1px solid var(--border, #ddd);
+                border-radius: 6px;
+                padding: 1.2rem 1.5rem;
+                margin: 2rem 0;
+                display: inline-block;
+                min-width: 280px;
+            }
+            .toc h4 {
+                margin: 0 0 0.7rem 0;
+                font-size: 0.95rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--text-muted, #666);
+            }
+            .toc ol {
+                margin: 0;
+                padding-left: 1.4rem;
+                line-height: 2;
+                font-size: 0.92rem;
+            }
+            .toc a {
+                text-decoration: none;
+                color: inherit;
+            }
+            .toc a:hover {
+                text-decoration: underline;
+            }
+            /* Side-by-side schematics */
+            .schematic-pair {
+                display: flex;
+                gap: 1.4rem;
+                margin: 1.8rem 0;
+                align-items: flex-start;
+            }
+            .schematic-pair figure {
+                flex: 1;
+                margin: 0;
+                text-align: center;
+            }
+            .schematic-pair img {
+                width: 100%;
+                border-radius: 6px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+            .schematic-pair img:hover {
+                transform: scale(1.02);
+                box-shadow: 0 5px 18px rgba(0,0,0,0.18);
+            }
+            .schematic-pair figcaption {
+                font-size: 0.82rem;
+                color: #777;
+                margin-top: 0.4rem;
+                font-style: italic;
+            }
+            @media (max-width: 640px) {
+                .schematic-pair { flex-direction: column; }
+            }
+            /* Fix bold labels in limitation/extension lists */
+            .titled-list {
+                margin: 0.5rem 0 1rem 1.5rem;
+                line-height: 2.2;
+            }
+            .titled-list li b {
+                color: var(--text, #111);
+                font-weight: 700;
+            }
         </style>
     </head>
 
@@ -56,39 +164,134 @@
 
         <div class="mainhw">
             <div class="top">
-                <h1> The seven minutes of terror - simulating mars reentry"</h1>
+                <h1>The seven minutes of terror - simulating mars reeentry</h1>
                 <br>
-                <b>2026-03-04 12:34:36</b>
+                <b>2026-03-04 12:40:32</b>
                 <br><br>
 
+                <!-- TOC -->
+                <nav class="toc">
+                    <h4>Contents</h4>
+                    <ol>
+                        <li><a href="#intro">Introduction</a></li>
+                        <li><a href="#what-is-edl">What is EDL?</a></li>
+                        <li><a href="#three-dof">What is 3-DOF?</a></li>
+                        <li><a href="#reference-frame">Reference Frame &amp; Coordinates</a></li>
+                        <li><a href="#eom">Equations of Motion</a></li>
+                        <li><a href="#atmosphere">Mars Atmosphere Model</a></li>
+                        <li><a href="#heating">Aerodynamic Heating - Sutton-Graves</a></li>
+                        <li><a href="#ablation">Heat Shield Ablation</a></li>
+                        <li><a href="#numerics">Numerical Integration - RK45</a></li>
+                        <li><a href="#ics">Initial Conditions &amp; Vehicle Parameters</a></li>
+                        <li><a href="#results">Simulation Results</a></li>
+                        <li><a href="#corridor">The Entry Corridor</a></li>
+                        <li><a href="#limitations">Limitations &amp; Extensions</a></li>
+                        <li><a href="#glossary">Glossary</a></li>
+                    </ol>
+                </nav>
+                    <p>**You can find the simulation code on <a href="https://github.com/aADI352/mars_EDL.git">GitHub</a>.</p>
+                <!-- ─────────────────────────────────────── 1. INTRO -->
+                <h2 id="intro" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Introduction</h2>
                 <p>
-                    If you've ever watched footage of the Curiosity rover landing on Mars, you've probably seen the mission control room erupt the moment they confirmed touchdown. What they were celebrating wasn't just a landing - it was the autonomous execution of the most complex entry, descent and landing sequence ever attempted, all in about seven minutes, with no ability to intervene from Earth due to the 14-minute signal travel time. Every single thing had to work perfectly, in sequence, with no margin for error.
+                    Mars EDL - Entry, Descent, and Landing - is arguably the most demanding phase of any Mars mission. With no ocean to splash down in, no runway to land on, and an atmosphere 170 times thinner than Earth's, a spacecraft arriving from interplanetary space must decelerate from roughly 6 km/s to a full stop in a matter of minutes.
                     <br><br>
-                    I've found that quite fascinating, and since I'm stuck at home, I decided to build a physics-based EDL trajectory simulator from scratch in Python. This post walks through the physics.
+                    NASA engineers famously called this the "seven minutes of terror": the time from atmospheric entry to surface touchdown during which the spacecraft operates entirely autonomously - signal delay from Earth makes any human intervention impossible.
+                    <br><br>
+                    I found this quite fascinating and since I'm stuck at home I built a 3 DOF simulator to simulate the hypersonic phase trajectory and performance.
                 </p>
 
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What is EDL?</h2>
+                <!-- ─────────────────────────────────────── 2. WHAT IS EDL -->
+                <h2 id="what-is-edl" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What is EDL?</h2>
                 <p>
-                    EDL stands for Entry, Descent and Landing. The entry interface - the point where the atmosphere becomes meaningful - is defined at 125 km altitude for Mars. At that altitude, the vehicle hits the atmosphere at roughly 5.9 km/s. There's no thrust, no active guidance during the heating phase, just the heat shield absorbing the energy that would otherwise vaporise the vehicle.
+                    EDL stands for Entry, Descent, and Landing. The entry interface - the point where the atmosphere becomes meaningful - is defined at 125 km altitude for Mars. There's no thrust during the heating phase - just the heat shield absorbing the energy that would otherwise vaporise the vehicle.
                     <br><br>
-                    The sequence for MSL (the Curiosity mission) goes: hypersonic entry - peak heating - Max-Q - parachute deployment at ~15 km - powered descent - skycrane - touchdown. My simulator covers the first phase - entry interface down to parachute deployment - since the physics are completely different once the heat shield is jettisoned.
+                    The sequence for MSL (the Curiosity mission) goes: hypersonic entry → peak heating → Max-Q → parachute deployment at ~15 km → powered descent → skycrane → touchdown. This simulation covers the first phase - entry interface down to parachute deployment - since the physics are completely different once the heat shield is jettisoned.
+                    <br><br>
+                    This simulation models the full hypersonic entry phase using a 3-DOF trajectory model in a rotating Mars reference frame. The coupled physics of orbital mechanics, atmospheric drag, aerodynamic heating, and heat shield ablation are all evolved simultaneously using a Runge-Kutta 45 numerical integrator.
                 </p>
 
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Reference frame and equations of motion</h2>
+                <!-- ─────────────────────────────────────── 3. 3-DOF -->
+                <h2 id="three-dof" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What is 3-DOF?</h2>
                 <p>
-                    The simulation uses a rotating polar coordinate frame fixed to Mars. The state vector has five components:
+                    A 3-DOF model tracks three independent dynamic variables. In this simulation, the state vector in the rotating Mars frame is:
                 </p>
 
                 <div id="latexelements">
                     \[
-                        \mathbf{s} = \begin{bmatrix} r \\ \theta \\ \dot{r} \\ r\dot{\theta} \\ m_{hs} \end{bmatrix}
+                        \mathbf{s} = \begin{bmatrix} r \\ \theta \\ v_r \\ v_\theta \\ m_{hs} \end{bmatrix}
                     \]
                 </div>
 
                 <p>
-                    where \(r\) is the radial distance from Mars' centre, \(\theta\) is the downrange angle, \(\dot{r}\) and \(r\dot{\theta}\) are the radial and tangential velocity components, and \(m_{hs}\) is the remaining heat-shield mass.
+                    where:<br>
+                     r = radial distance from Mars center (m)<br>
+                     θ = downrange angular position (rad)<br>
+                        v_r = radial (vertical) velocity component (m/s)<br>
+                        v_θ = tangential (horizontal) velocity component (m/s)<br>
+                        m_hs = heat shield mass (kg, decreasing due to ablation)<br><br>
+                        
+
+                </p>
+                <p>
+                    We do not model roll, pitch, or yaw - those are attitude degrees of freedom (a 6-DOF problem). The capsule is assumed to fly at a fixed aerodynamic orientation (zero angle of attack), which is valid for a blunt-body capsule like MSL during the hypersonic phase.
+                </p>
+
+                <!-- ─────────────────────────────────────── 4. REFERENCE FRAME -->
+                <h2 id="reference-frame" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Reference Frame and Coordinate System</h2>
+                <p>
+                    The simulation uses a 2D (in-plane) polar coordinate system fixed to the rotating Mars surface. This is physically realistic because the landing site rotates with the planet, and the Coriolis effect due to Mars's rotation is non-negligible over the entry duration.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Inertial vs. Rotating Frame</h3>
+                <p>
+                    An inertial (non-rotating) frame is the simplest for writing Newton's laws - there are no fictitious forces. However, since we care about where the capsule lands relative to a surface target, it's more useful to work in the rotating frame, where the surface is stationary.
                     <br><br>
-                    Working in a rotating frame means you pick up Coriolis and centrifugal terms. The complete first-order ODE system that the integrator solves is:
+                    Transforming Newton's second law into a rotating frame introduces two fictitious accelerations:
+                </p>
+                <ul class="titled-list">
+                    <li><b>Coriolis acceleration:</b> \(+2\boldsymbol{\Omega} \times \mathbf{v}\) - appears because velocity in the rotating frame differs from the inertial velocity.</li>
+                    <li><b>Centrifugal acceleration:</b> \(+\Omega^2 r\) - appears because the rotating frame itself is accelerating outward.</li>
+                </ul>
+                <p>
+                    Here \(\Omega = 7.088 \times 10^{-5}\) rad/s is Mars's rotation rate (sidereal day of ~24.62 hours).
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Polar Coordinates</h3>
+                <p>
+                    The position of the capsule is described by \((r, \theta)\), where \(r\) is the distance from Mars's center and \(\theta\) is the angular displacement downrange from the entry point. Velocities are resolved as:
+                </p>
+                <div id="latexelements">
+                    \[
+                        v_r = \dot{r} \quad \text{(positive = moving away from surface)}
+                    \]
+                    \[
+                        v_\theta = r\dot{\theta} \quad \text{(positive = moving downrange)}
+                    \]
+                </div>
+                <p>
+                    The flight path angle \(\gamma\) at any instant can be recovered from:
+                </p>
+                <div id="latexelements">
+                    \[
+                        \gamma = \arctan\!\left(\frac{v_r}{v_\theta}\right) \quad \text{[rad, negative during descent]}
+                    \]
+                </div>
+
+                <div class="schematic-pair">
+                    <figure>
+                        <img src="./src/mars_global_schematic.png" alt="Polar coordinate frame – entry trajectory overview">
+                        <figcaption>Polar frame – entry trajectory overview</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="./src/mars_edl_schematic.png" alt="Free-body diagram at the capsule">
+                        <figcaption>FBD – forces &amp; velocity at the capsule</figcaption>
+                    </figure>
+                </div>
+
+                <!-- ─────────────────────────────────────── 5. EOM -->
+                <h2 id="eom" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Equations of Motion</h2>
+                <p>
+                    The equations of motion in the rotating polar frame are derived by applying Newton's second law with gravity, drag, Coriolis, and centrifugal forces. The result is a system of five coupled first-order ODEs:
                 </p>
 
                 <div id="latexelements">
@@ -104,89 +307,261 @@
                 </div>
 
                 <p>
-                    The first two equations are pure kinematics - they translate the state variables into rates of change of position. The \(\dot{v}_r\) and \(\dot{v}_\theta\) equations are the dynamics: centripetal acceleration (\(v_\theta^2/r\)), gravity (\(-\mu/r^2\)), aerodynamic drag components, Coriolis (\(2\Omega v_\theta\), \(-2\Omega v_r\)), and centrifugal (\(\Omega^2 r\)) terms from the rotating frame. The last equation couples the aerothermal environment back into the vehicle mass, making the system non-conservative.
-                    <br><br>
-                    For Mars, \(\Omega = 7.088 \times 10^{-5}\) rad/s. The Coriolis and centrifugal terms are small compared to drag and gravity, but at entry velocities they do accumulate over the trajectory.
-                    <br><br>
-                    The aerodynamic drag force magnitude is:
+                    The first two equations are pure kinematics - the rate of change of position equals the velocity components. The velocity dynamics include every force acting on the vehicle:
                 </p>
 
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Term</th><th>Expression</th><th>Physical meaning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Centripetal</td><td>\(v_\theta^2 / r\)</td><td>Inertial tendency of tangential motion to push outward</td></tr>
+                        <tr><td>Gravity</td><td>\(-\mu / r^2\)</td><td>Mars gravitational attraction (\(\mu = 4.28 \times 10^{13}\) m³/s²)</td></tr>
+                        <tr><td>Drag (radial)</td><td>\(F_{D,r} / m\)</td><td>Drag component opposing radial motion</td></tr>
+                        <tr><td>Coriolis (radial)</td><td>\(+2\Omega v_\theta\)</td><td>Fictitious: tangential motion creates apparent radial push</td></tr>
+                        <tr><td>Centrifugal</td><td>\(+\Omega^2 r\)</td><td>Fictitious outward push from the rotating frame</td></tr>
+                        <tr><td>Curvature (tangential)</td><td>\(-v_r v_\theta / r\)</td><td>Geometric coupling: descending while moving tangentially</td></tr>
+                        <tr><td>Drag (tangential)</td><td>\(F_{D,\theta} / m\)</td><td>Drag component opposing tangential motion</td></tr>
+                        <tr><td>Coriolis (tangential)</td><td>\(-2\Omega v_r\)</td><td>Fictitious: radial motion deflects tangential velocity</td></tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    The last equation couples the aerothermal environment back into the vehicle mass, making the system non-conservative. Ablation reduces \(m_{hs}\), which reduces total vehicle mass, which changes the drag deceleration.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Drag Force</h3>
+                <p>
+                    The aerodynamic drag force is modeled using the standard drag equation:
+                </p>
                 <div id="latexelements">
                     \[
-                        F_D = C_D \cdot A_{ref} \cdot q_\infty = C_D \cdot A_{ref} \cdot \frac{1}{2}\rho v^2
+                        F_D = \tfrac{1}{2}\,\rho\, v^2\, C_D\, A_{ref}
+                    \]
+                </div>
+                <p>
+                    where \(\rho\) is local atmospheric density, \(v = \sqrt{v_r^2 + v_\theta^2}\) is speed, \(C_D = 1.65\) is the drag coefficient for a 70° sphere-cone (MSL geometry), and \(A_{ref} = 15.9\) m² is the reference area (capsule cross-section, \(D = 4.5\) m). The force vector opposes velocity, so its components are:
+                </p>
+                <div id="latexelements">
+                    \[
+                        F_{D,r} = -F_D \,\frac{v_r}{v}, \qquad
+                        F_{D,\theta} = -F_D \,\frac{v_\theta}{v}
                     \]
                 </div>
 
+                <!-- ─────────────────────────────────────── 6. ATMOSPHERE -->
+                <h2 id="atmosphere" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Mars Atmosphere Model</h2>
                 <p>
-                    with components applied antiparallel to the velocity vector.
+                    The Martian atmosphere is composed primarily of CO₂ (~95%) with trace amounts of nitrogen and argon. Its surface pressure is only ~600 Pa - less than 1% of Earth's - making it simultaneously thin enough to complicate parachute deployment and dense enough at lower altitudes to generate intense aerodynamic heating.
+                    <br><br>
+                    Unlike Earth, Mars has no well-established analogue to the US Standard Atmosphere with distinct temperature layers. Instead, a single-exponential model is used, based on the Justus &amp; Braun (2007) engineering model:
                 </p>
-
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Atmosphere model</h2>
-                <p>
-                    I'm using an exponential atmosphere - a simplified version of the Justus-Braun Mars atmospheric model that works reasonably well over the altitude range we care about:
-                </p>
-
                 <div id="latexelements">
                     \[
-                        \rho(h) = \rho_0 \, e^{-h/H}
+                        \rho(h) = \rho_0\, e^{-h/H}
+                    \]
+                </div>
+                <p>
+                    with \(\rho_0 = 0.020\) kg/m³ (surface reference density) and \(H = 11{,}100\) m (atmospheric scale height). The scale height arises physically from the hydrostatic balance and ideal gas law: \(H = R_{\text{specific}} T / g\), where \(T \approx 210\) K is the mean atmospheric temperature on Mars.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Earth vs. Mars - A Comparison</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Property</th><th>Earth</th><th>Mars</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Surface pressure</td><td>101,325 Pa</td><td>~636 Pa</td></tr>
+                        <tr><td>Surface density</td><td>1.225 kg/m³</td><td>~0.020 kg/m³</td></tr>
+                        <tr><td>Scale height</td><td>~8,500 m</td><td>~11,100 m</td></tr>
+                        <tr><td>Main composition</td><td>N₂ / O₂</td><td>CO₂ (~95%)</td></tr>
+                        <tr><td>Entry interface</td><td>~120 km</td><td>~125 km</td></tr>
+                    </tbody>
+                </table>
+                <p>
+                    The thinner Mars atmosphere means that for the same entry speed, the capsule spends more time at high velocities before adequate deceleration is achieved - hence the need for precise entry angles, and why the parachute alone isn't enough without powered descent.
+                </p>
+
+                <!-- ─────────────────────────────────────── 7. HEATING -->
+                <h2 id="heating" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Aerodynamic Heating - Sutton-Graves</h2>
+                <p>
+                    When a body enters an atmosphere at hypersonic speeds, kinetic energy is converted into thermal energy through bow-shock compression. A small fraction of this energy is transferred to the vehicle surface as heat flux. The most severe heating occurs at the <em>stagnation point</em> - the forward-facing center of the heat shield where flow is brought to rest.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Physical Mechanism</h3>
+                <p>
+                    At hypersonic velocities, air molecules in front of the capsule cannot get out of the way fast enough. A detached bow shock forms ahead of the vehicle. Behind the shock, the gas is compressed and heated to temperatures exceeding 10,000 K - hotter than the surface of the Sun. This hot gas boundary layer then transfers heat to the vehicle via convection.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">The Sutton-Graves Equation</h3>
+                <p>
+                    The stagnation-point convective heat flux is given by the semi-empirical Sutton-Graves relation:
+                </p>
+                <div id="latexelements">
+                    \[
+                        \dot{q}_s = k \sqrt{\frac{\rho}{R_n}}\, v^3 \quad \text{[W/m²]}
+                    \]
+                </div>
+                <p>
+                    where \(k\) is the Sutton-Graves constant (specific to the atmosphere's gas composition), \(\rho\) is local atmospheric density, \(R_n \) is the nose radius (larger nose → less heating), and \(v\) is vehicle speed. For Mars's CO₂-dominated atmosphere:
+                </p>
+                <div id="latexelements">
+                    \[
+                        k_{\text{Mars}} = 1.9027 \times 10^{-4}\quad \left[\text{W}\cdot\text{s}^3 / (\text{kg}^{0.5}\cdot\text{m}^{2.5})\right]
+                    \]
+                </div>
+                <p>
+                    For comparison, \(k_{\text{Earth}} \approx 1.7415 \times 10^{-4}\) in the same units. The slightly higher value for Mars reflects the different thermodynamic properties of CO₂.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Why \(v^3\)?</h3>
+                <p>
+                    The cubic dependence on velocity is the most important feature of this equation. Doubling entry speed increases heat flux by a factor of 8. This is why even a shallow trajectory optimisation that reduces peak velocity by 10% can halve the peak heating, and why the entry corridor - the range of acceptable flight path angles - is so narrow.
+                    <br><br>
+                    The \(\sqrt{\rho}\) term explains why peak heating does not occur at entry interface (where \(v\) is maximum but \(\rho \approx 0\)) or at the surface (where \(\rho\) is maximum but \(v \approx 0\)). Peak heating occurs at intermediate altitude, where the product \(\rho \cdot v^6\) is maximised.
+                </p>
+
+                <p>
+                    The simulator outputs peak heat flux, time and altitude of peak heating, and speed at peak heating for any set of input parameters. For an MSL-like entry (steep angle, high speed, large blunt body), the peak stagnation flux lands in the hundreds of kW/m² to low MW/m² range - consistent with the ~0.8 MW/m² measured on Curiosity, with the exact value depending strongly on entry speed, flight path angle, and nose radius.
+                </p>
+
+                <!-- ─────────────────────────────────────── 8. ABLATION -->
+                <h2 id="ablation" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Heat Shield Ablation</h2>
+                <p>
+                    The function of the heat shield is to absorb and re-radiate or carry away the enormous heat load of entry. Modern heat shields use ablative thermal protection systems (TPS) - materials that char, decompose, and erode, carrying energy away in the process.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">PICA - the MSL TPS Material</h3>
+                <p>
+                    The Mars Science Laboratory used Phenolic Impregnated Carbon Ablator (PICA) as its TPS material. PICA pyrolyzes at high temperatures: the polymer binder decomposes, injecting gases into the boundary layer (which reduces heat transfer - a phenomenon called "blowing"), while leaving behind a low-density carbonized char layer that insulates the underlying structure.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Ablation Energy Balance</h3>
+                <p>
+                    The mass loss rate of the heat shield is modeled via a simple energy balance at the stagnation point. The rate at which mass is ablated equals the incoming heat power divided by the specific ablation enthalpy:
+                </p>
+                <div id="latexelements">
+                    \[
+                        \dot{m}_{hs} = -\frac{\dot{q}_s \cdot A_{hs}}{H_{abl}} \quad \text{[kg/s]}
+                    \]
+                </div>
+                <p>
+                    where \(A_{hs} = 15.9\) m² is the heat shield area (same as \(A_{ref}\) for a blunt body), \(H_{abl} = 1.5 \times 10^7\) J/kg is the effective ablation enthalpy of PICA-like material, and \(m_{hs}\) is initialized at 120 kg. The ablation enthalpy lumps together pyrolysis, sublimation, and gas injection - it's an effective value, not a single-process constant.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Coupling to Dynamics</h3>
+                <p>
+                    Ablation couples back to the trajectory through vehicle mass. As the heat shield erodes, total vehicle mass decreases:
+                </p>
+                <div id="latexelements">
+                    \[
+                        m_{\text{vehicle}}(t) = m_{\text{entry}} - \bigl(m_{hs,0} - m_{hs}(t)\bigr)
+                    \]
+                </div>
+                <p>
+                    Since drag deceleration scales as \(F_{drag}/m\), a lighter vehicle decelerates faster. This is a coupled thermo-mechanical effect: heating causes ablation, ablation reduces mass, reduced mass changes the deceleration profile.
+                    <br><br>
+                    There is a counterintuitive result buried in this coupling: a <em>higher</em> drag coefficient actually reduces total ablation. The mechanism is straightforward - higher \(C_D\) means the vehicle decelerates more aggressively, but at higher altitude where the atmosphere is exponentially thinner. Peak heat flux occurs where \(\rho v^3\) is maximised; if deceleration happens earlier at higher \(h\) (lower \(\rho\)), the vehicle arrives at the density-rich lower atmosphere already slow, so the \(v^3\) term is far smaller by the time \(\rho\) is large enough to matter. The net result is a lower peak \(\dot{q}_s\) and less integrated heat load. This is part of why blunt-body aeroshells with high \(C_D\) are thermally favourable - the aerodynamic inefficiency is a feature, not a bug.
+                </p>
+
+                <p>
+                    The fraction of the heat shield ablated depends heavily on the integrated heat load - which in turn depends on entry speed, angle, and \(C_D\). A shallower entry angle or a larger nose radius will spread the heating out and reduce peak ablation rate, while a steeper, faster entry can ablate a much larger fraction of the shield. The simulator tracks this in real time so you can see exactly how sensitive the ablation is to each parameter.
+                </p>
+
+                <!-- ─────────────────────────────────────── 9. NUMERICS -->
+                <h2 id="numerics" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Numerical Integration - Runge-Kutta 45</h2>
+                <p>
+                    The five ODEs form a coupled initial value problem (IVP) that cannot be solved analytically. The solver is <code>scipy.integrate.solve_ivp</code> with the RK45 method (Dormand-Prince pair).
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Why RK45?</h3>
+                <p>
+                    The Runge-Kutta 4(5) method is an adaptive, explicit method that uses a 4th-order solution for integration and a 5th-order solution for error estimation. At each step, it:
+                </p>
+                <ul style="margin: 0.5rem 0 1rem 1.5rem; line-height:2.0;">
+                    <li>Proposes a step size \(h\)</li>
+                    <li>Computes six function evaluations (the slopes \(k_1\) through \(k_6\))</li>
+                    <li>Forms both a 4th-order and 5th-order estimate of the solution</li>
+                    <li>Compares them to estimate local truncation error</li>
+                    <li>Accepts or rejects the step and adjusts \(h\) accordingly</li>
+                </ul>
+                <p>
+                    This is ideal for our problem because the dynamics vary enormously over the entry - the solution is nearly inert at entry interface but becomes stiff (rapidly changing) during peak heating and deceleration. Adaptive step control automatically takes smaller steps through the high-heating phase and larger steps near the start.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Tolerances</h3>
+                <div id="latexelements">
+                    \[
+                        \texttt{rtol} = 10^{-8} \quad \text{(relative)} \qquad \texttt{atol} = 10^{-9} \quad \text{(absolute)}
+                    \]
+                </div>
+                <p>
+                    These tight tolerances ensure that trajectory errors remain below 1 cm in position and 1 mm/s in velocity over the entire entry. Using loose tolerances (e.g., \(10^{-3}\)) would produce visible artifacts in the heat flux curve and incorrect peak heating values.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Event Detection</h3>
+                <p>
+                    <code>solve_ivp</code> supports "events" - callable functions that trigger the integrator to stop (terminal events) or simply log a timestamp. Two terminal events are used:
+                </p>
+                <ul class="titled-list">
+                    <li><b>hit_ground:</b> terminates when \(r &lt; R_{\text{Mars}} + 10\) m (prevents integrating into the ground)</li>
+                    <li><b>supersonic_chute:</b> terminates when \(v &lt; 400\) m/s and \(h &lt; 15\) km - approximate Mach 2 parachute deploy condition for Mars, analogous to MSL's supersonic parachute at Mach 2.2</li>
+                </ul>
+                <p>
+                    The chute deploy event typically triggers somewhere in the 100–200 s range and several km altitude, depending on the entry parameters - steeper entries reach Mach 2 faster and higher, shallower ones take longer and come in lower.
+                </p>
+
+                <!-- ─────────────────────────────────────── 10. ICS -->
+                <h2 id="ics" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Input Parameters</h2>
+
+                <p>
+                    The simulator takes the following as inputs - all of which can be varied to explore different scenarios:
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Entry State</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Parameter</th><th>Symbol</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Entry altitude</td><td>\(h_{\text{entry}}\)</td><td>Typically 125 km for Mars (standard entry interface)</td></tr>
+                        <tr><td>Entry speed</td><td>\(V_{\text{entry}}\)</td><td>Inertial speed at entry interface [m/s]</td></tr>
+                        <tr><td>Flight path angle</td><td>\(\gamma\)</td><td>Angle below horizontal at entry. Negative = descending. Defines the steep/shallow tradeoff.</td></tr>
+                        <tr><td>Entry mass</td><td>\(m_{\text{entry}}\)</td><td>Total vehicle mass at entry interface [kg]</td></tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    The entry speed and flight path angle are decomposed into the rotating-frame velocity components used by the integrator:
+                </p>
+                <div id="latexelements">
+                    \[
+                        v_r = V_{\text{entry}}\sin\gamma \quad \text{(negative = descending)}
+                    \]
+                    \[
+                        v_\theta = V_{\text{entry}}\cos\gamma \quad \text{(positive = downrange)}
                     \]
                 </div>
 
-                <p>
-                    with \(\rho_0 = 0.020\) kg/m³ (surface density) and \(H = 11{,}100\) m (scale height). Mars' atmosphere is about 95% CO₂ and roughly 1% as dense as Earth's at the surface, which is exactly why you need to be going so fast to have enough aerodynamic authority to decelerate - and also why the parachute alone isn't enough and you need the powered descent stage.
-                </p>
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Vehicle and Aerodynamic Parameters</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Parameter</th><th>Symbol</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Drag coefficient</td><td>\(C_D\)</td><td>Blunt-body capsules typically 1.5–1.7; directly sets deceleration rate</td></tr>
+                        <tr><td>Capsule diameter</td><td>\(D\)</td><td>Sets the reference area \(A_{ref} = \pi(D/2)^2\)</td></tr>
+                        <tr><td>Nose radius</td><td>\(R_n\)</td><td>Larger nose → lower peak heat flux (appears under the square root in Sutton-Graves)</td></tr>
+                        <tr><td>Heat shield initial mass</td><td>\(m_{hs,0}\)</td><td>TPS mass available for ablation [kg]</td></tr>
+                        <tr><td>Ablation enthalpy</td><td>\(H_{abl}\)</td><td>Energy absorbed per kg of material ablated; material-dependent [J/kg]</td></tr>
+                    </tbody>
+                </table>
 
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Aerodynamic heating - Sutton-Graves</h2>
-                <p>
-                    This is the scary part. The stagnation-point heat flux is calculated using the Sutton-Graves relation:
-                </p>
-
-                <div id="latexelements">
-                    \[
-                        \dot{q}_s = k \sqrt{\frac{\rho}{R_n}} \, v^3
-                    \]
-                </div>
-
-                <p>
-                    where \(k = 1.9027 \times 10^{-4}\) is the Sutton-Graves constant for a CO₂ atmosphere, \(R_n\) is the nose radius of the heat shield, and \(v\) is the velocity magnitude. The \(v^3\) dependence is what makes reentry heating so extreme - double the velocity and you get eight times the heat flux.
-                    <br><br>
-                    The relation comes from boundary layer similarity theory for a blunt body in a high-enthalpy flow. It's an empirical correlation, so it has limitations - it doesn't account for radiative heating, non-equilibrium gas effects, or ablation products in the boundary layer - but for first-order trajectory simulation it's standard practice.
-                </p>
-
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Heat shield ablation</h2>
-                <p>
-                    The heat shield (PICA - Phenolic Impregnated Carbon Ablator) doesn't just reflect or re-radiate the heat flux - it actively ablates. Material is pyrolysed and ejected into the boundary layer, which actually helps cool the surface by carrying energy away. The mass loss rate comes from a simple energy balance at the stagnation point:
-                </p>
-
-                <div id="latexelements">
-                    \[
-                        \dot{m}_{hs} = -\frac{\dot{q}_s \cdot A_{ref}}{H_{abl}}
-                    \]
-                </div>
+                <!-- ─────────────────────────────────────── 11. RESULTS -->
+                <h2 id="results" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Simulation Results</h2>
 
                 <p>
-                    where \(H_{abl} = 1.5 \times 10^7\) J/kg is the effective ablation enthalpy of PICA. The ablating mass feeds back into the total vehicle mass and therefore the deceleration - the vehicle is getting lighter as it slows down.
-                    <br><br>
-                    There is a counterintuitive result buried in the coupling between \(\dot{q}_s\) and \(\dot{m}_{hs}\): a higher drag coefficient actually reduces total ablation. The mechanism is straightforward. Higher \(C_D\) means more drag force per unit dynamic pressure, so the vehicle decelerates more aggressively - but it does so at higher altitude, where the atmosphere is exponentially thinner. Peak heat flux occurs where \(\rho v^3\) is maximised; if most of the deceleration happens earlier (higher \(h\), lower \(\rho\)), the vehicle arrives at the density-rich lower atmosphere already slow, so the \(v^3\) term is far smaller by the time \(\rho\) is large enough to matter. The net result is a lower peak \(\dot{q}_s\) and less integrated heat load, despite the vehicle spending more time in the atmosphere. This is part of why blunt-body aeroshells with high \(C_D\) are thermally favourable - the aerodynamic inefficiency is a feature, not a bug.
-                </p>
-
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Numerical integration</h2>
-                <p>
-                    The ODE system is integrated with <code>scipy.integrate.solve_ivp</code> using the RK45 adaptive step-size method (Dormand-Prince), with two terminal events:
-                    <br><br>
-                    1. Ground impact: \(r = R_{Mars} + 10\) m<br>
-                    2. Parachute deployment: \(v &lt; 400\) m/s at \(h &lt; 15\) km (roughly Mach 2 on Mars)
-                    <br><br>
-                    Tolerances are set to \(10^{-8}\) (relative) and \(10^{-9}\) (absolute) to keep trajectory errors negligible. The adaptive step control means the solver automatically takes smaller steps through the high-heating, high-deceleration phase and larger steps at the beginning where the dynamics are slower.
-                </p>
-
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What the simulation shows</h2>
-                <p>
-                    The entry phase captures a few things that are easy to derive from the equations but still satisfying to see come out of the simulation. Velocity drops almost entirely due to aerodynamic drag - gravity barely contributes. The stagnation heat flux peaks at intermediate altitude, where the product \(\rho v^3\) is maximised; at high altitude the density is too low, and at low altitude the vehicle has slowed enough that the cubic velocity term dominates. The axial deceleration peak coincides roughly with peak dynamic pressure (Max-Q), which is the most structurally demanding point of the flight.
-                    <br><br>
-                    The heat shield ablation is concentrated in a narrow altitude band around peak heating and drops off sharply as the vehicle decelerates. The simulation terminates at parachute deployment conditions.
-                    <br><br>
-                    The 9-panel summary and the animated trajectory are below. Entry conditions and key outputs are in the summary panel (bottom right of the figure).
+                    For each run the simulator outputs: altitude, speed, and flight path angle over time; stagnation heat flux and integrated heat load; axial g-load and dynamic pressure; heat shield remaining mass; and the full 9-panel summary figure. The termination condition (chute deploy vs. ground impact) and the time/altitude at which it triggers are also reported.
                 </p>
 
                 <div class="media-grid">
@@ -202,28 +577,84 @@
                     </div>
                 </div>
 
-                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">What's missing</h2>
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Physical Interpretation of the g-load Curve</h3>
                 <p>
-                    The atmosphere model is simplified. A proper simulation would use a tabulated atmosphere (MarsGRAM or similar) accounting for seasonal and latitudinal density variations, and a full thermochemical non-equilibrium heating model rather than the Sutton-Graves correlation.
-                    <br><br>
-                    The simulation also only covers the hypersonic entry phase. Modelling the rest of EDL would need a completely different drag model for the parachute, a guidance and control loop for the powered descent, and six degrees of freedom instead of three. That's a project for another time.
-                    <br><br>
-                    The code is on my <a href="https://github.com/aADI352/mars_EDL.git">GitHub</a>.
+                    The deceleration-time profile is characteristic of all blunt-body entries and falls into three distinct phases:
                 </p>
+                <ul class="titled-list">
+                    <li><b>Phase 1 - near-vacuum coast:</b> Density is too low for significant drag. Essentially freefall; g-load near 0. Duration depends heavily on entry angle - shallower entries spend more time here.</li>
+                    <li><b>Phase 2 - heating phase:</b> Rapid density increase drives exponential drag growth. Both peak heat flux and peak g-load occur here. Steeper entry angles compress this phase into a shorter, more intense pulse.</li>
+                    <li><b>Phase 3 - deceleration tail:</b> Speed has dropped significantly. Despite denser atmosphere, lower \(v^2\) means drag and heating fall off quickly. The capsule coasts toward parachute deploy conditions.</li>
+                </ul>
+
+                <!-- ─────────────────────────────────────── 12. CORRIDOR -->
+                <h2 id="corridor" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">The Entry Corridor</h2>
+                <p>
+                    One of the most important constraints in EDL design is the entry corridor - the acceptable range of flight path angles at entry interface. Too steep, and the vehicle experiences excessive heating and g-loads (it "burns in"). Too shallow, and it bounces off the atmosphere and escapes back to space (it "skips out").
+                    <br><br>
+                    For Mars EDL, the entry corridor is typically only 2–3 degrees wide. MSL targeted −15.5° and achieved −15.4° - a remarkable navigation achievement after a 7-month interplanetary cruise. This is a direct consequence of the \(v^3\) dependence of heating: a small change in entry angle changes the velocity profile enough to push heat flux past material limits on one side, or insufficient deceleration on the other.
+                </p>
+
+                <!-- ─────────────────────────────────────── 14. LIMITATIONS -->
+                <h2 id="limitations" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Limitations and Possible Extensions</h2>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Current Limitations</h3>
+                <ul class="titled-list">
+                    <li><b>2D planar trajectory only</b> - no cross-range motion, no bank-angle guidance (bank angles are how real EDL systems perform lateral steering).</li>
+                    <li><b>Zero angle of attack assumed</b> - a real capsule has a non-zero trim angle to generate lift, enabling corridor widening and landing ellipse reduction.</li>
+                    <li><b>Exponential atmosphere</b> - the real Mars atmosphere varies with season, latitude, longitude, and dust storm activity. Mission design uses full MOLA-based atmosphere models.</li>
+                    <li><b>Simple ablation model</b> - the energy balance ignores radiative heat flux (significant above ~7 km/s), pyrolysis gas injection ("blowing"), and char layer thermal conduction.</li>
+                    <li><b>No parachute / retropropulsion phase</b> - the simulation terminates at Mach 2 chute deploy. simulating final descent and landing requires active control, powered descent and steering simulation, which is a more complex 6DOF problem - a project for another time!  </li>
+                </ul>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Possible Extensions</h3>
+                <ul class="titled-list">
+                    <li><b>Add lift force:</b> \(F_L = \frac{1}{2}\rho v^2 C_L A_{ref}\), with \(C_L\) from aerodatabase tables - enables 3-DOF bank-angle guidance simulation.</li>                
+                    <li><b>Add radiative heating:</b> at speeds above ~6 km/s, radiation from the hot shock layer becomes the dominant heat flux mechanism. The Tauber-Sutton model adds this.</li>
+                    <li><b>Full 6-DOF:</b> add pitch, roll, yaw dynamics - required for modeling RCS thruster firings and bank-angle control.</li>
+                </ul>
+
+                <!-- ─────────────────────────────────────── 15. GLOSSARY -->
+                <h2 id="glossary" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Glossary</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Term</th><th>Definition</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>3-DOF</td><td>Three Degrees of Freedom - position (\(r, \theta\)) and velocity (\(v_r, v_\theta\)) in 2D plane</td></tr>
+                        <tr><td>Ablation</td><td>Thermal protection via material erosion - removes heat by carrying away hot gas</td></tr>
+                        <tr><td>Blunt body</td><td>A vehicle shape with a large nose radius that creates a strong, stand-off bow shock, reducing surface heating</td></tr>
+                        <tr><td>Centrifugal</td><td>Fictitious outward force in a rotating reference frame (\(= \Omega^2 r\))</td></tr>
+                        <tr><td>Coriolis</td><td>Fictitious force in a rotating frame arising from motion within that frame (\(= 2\boldsymbol{\Omega} \times \mathbf{v}\))</td></tr>
+                        <tr><td>Dynamic pressure</td><td>\(q = \frac{1}{2}\rho v^2\) - a measure of aerodynamic load intensity</td></tr>
+                        <tr><td>EDL</td><td>Entry, Descent, and Landing - the full sequence from atmospheric entry to surface touchdown</td></tr>
+                        <tr><td>Entry corridor</td><td>The range of flight path angles at entry interface that result in successful landing</td></tr>
+                        <tr><td>Flight path angle</td><td>Angle between velocity vector and local horizontal. Negative = descending.</td></tr>
+                        <tr><td>g-load</td><td>Vehicle deceleration expressed as multiples of gravitational acceleration</td></tr>
+                        <tr><td>ODE</td><td>Ordinary Differential Equation - equations governing how the state evolves in time</td></tr>
+                        <tr><td>PICA</td><td>Phenolic Impregnated Carbon Ablator - the TPS material used on MSL (Curiosity)</td></tr>
+                        <tr><td>RK45</td><td>Runge-Kutta 4(5) - an adaptive-step numerical integration method for ODEs</td></tr>
+                        <tr><td>Scale height</td><td>Altitude over which atmospheric density drops by factor \(e \approx 2.718\). \(H = R_{\text{specific}} T / g\)</td></tr>
+                        <tr><td>Stagnation point</td><td>The point on the vehicle where flow velocity is zero - maximum pressure and heating</td></tr>
+                        <tr><td>Sutton-Graves</td><td>Semi-empirical equation for stagnation-point convective heat flux: \(\dot{q} = k\sqrt{\rho/R_n}\,v^3\)</td></tr>
+                        <tr><td>TPS</td><td>Thermal Protection System - the heat shield and all insulation protecting the spacecraft</td></tr>
+                    </tbody>
+                </table>
 
             </div>
         </div>
 
-        <div id="nav">
+                <div id="nav">
             <ul>
                 <li><a href="https://x.com/AtrashAdi"><span>twitter</span></a></li>
                 <li><a href="https://www.linkedin.com/in/adi-atrash-6857b1197/"><span>linkedin</span></a></li>
-                <li><a href="../Courses.html"><span>Courses &amp; modules</span></a></li>
-                <li><a href="../resume.html"><span>Resume</span></a></li>
+                <li><a href="https://github.com/aADI352"><span>github</span></a></li>
+                <li><a href="../Courses.html"><span>courses</span></a></li>
+                <li><a href="../resume.html"><span>resume</span></a></li>
             </ul>
         </div>
 
-        <div id="footer">&copy; 2026 Adi Atrash</div>
+                <div id="footer">&copy; 2026 Adi Atrash</div>
 
         <!-- Modal for image lightbox -->
         <div id="imageModal" class="modal">
@@ -236,7 +667,7 @@
             const modalImg = document.getElementById('modalImage');
             const closeBtn = document.getElementsByClassName('close')[0];
 
-            document.querySelectorAll('.media-grid img').forEach(img => {
+            document.querySelectorAll('.media-grid img, .schematic-pair img').forEach(img => {
                 img.addEventListener('click', function () {
                     modal.style.display = 'block';
                     modalImg.src = this.src;
