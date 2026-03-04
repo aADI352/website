@@ -164,7 +164,7 @@
 
         <div class="mainhw">
             <div class="top">
-                <h1>The seven minutes of terror - simulating mars reeentry</h1>
+                <h1>The seven minutes of terror - simulating mars reentry</h1>
                 <br>
                 <b>2026-03-04 12:40:32</b>
                 <br><br>
@@ -183,13 +183,15 @@
                         <li><a href="#ablation">Heat Shield Ablation</a></li>
                         <li><a href="#numerics">Numerical Integration - RK45</a></li>
                         <li><a href="#ics">Initial Conditions &amp; Vehicle Parameters</a></li>
+                        <li><a href="#phase2">Phase 2: Parachute Descent</a></li>
+                        <li><a href="#phase3">Phase 3: Powered Descent - PDG</a></li>
                         <li><a href="#results">Simulation Results</a></li>
                         <li><a href="#corridor">The Entry Corridor</a></li>
                         <li><a href="#limitations">Limitations &amp; Extensions</a></li>
                         <li><a href="#glossary">Glossary</a></li>
                     </ol>
                 </nav>
-                    <p>**You can find the simulation code on <a href="https://github.com/aADI352/mars_EDL.git">GitHub</a>.</p>
+                    <p>You can find the simulation code on <a href="https://github.com/aADI352/mars_EDL.git" style="color:#2563eb; text-decoration:underline;">GitHub</a>.</p>
                 <!-- ─────────────────────────────────────── 1. INTRO -->
                 <h2 id="intro" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Introduction</h2>
                 <p>
@@ -205,9 +207,9 @@
                 <p>
                     EDL stands for Entry, Descent, and Landing. The entry interface - the point where the atmosphere becomes meaningful - is defined at 125 km altitude for Mars. There's no thrust during the heating phase - just the heat shield absorbing the energy that would otherwise vaporise the vehicle.
                     <br><br>
-                    The sequence for MSL (the Curiosity mission) goes: hypersonic entry → peak heating → Max-Q → parachute deployment at ~15 km → powered descent → skycrane → touchdown. This simulation covers the first phase - entry interface down to parachute deployment - since the physics are completely different once the heat shield is jettisoned.
+                    The sequence for MSL (the Curiosity mission) goes: hypersonic entry → peak heating → Max-Q → parachute deployment at ~15 km → powered descent → skycrane → touchdown. This simulation now covers all three phases - hypersonic entry, parachute descent, and powered descent - using the same 3-DOF polar coordinate framework throughout, with appropriate force models added for each phase.
                     <br><br>
-                    This simulation models the full hypersonic entry phase using a 3-DOF trajectory model in a rotating Mars reference frame. The coupled physics of orbital mechanics, atmospheric drag, aerodynamic heating, and heat shield ablation are all evolved simultaneously using a Runge-Kutta 45 numerical integrator.
+                    Phase 1 models hypersonic entry with aeroshell drag, aerodynamic heating, and heat shield ablation. Phase 2 models supersonic parachute descent from chute deployment down to Powered Descent Initiation (PDI) at 1.5 km. Phase 3 models powered descent from PDI to touchdown using a constant-deceleration PDG (Powered Descent Guidance) law with proportional feedback - a simplified version of the algorithms flown on real Mars landers.
                 </p>
 
                 <!-- ─────────────────────────────────────── 3. 3-DOF -->
@@ -557,11 +559,154 @@
                     </tbody>
                 </table>
 
-                <!-- ─────────────────────────────────────── 11. RESULTS -->
+                <!-- 11. PHASE 2 -->
+                <h2 id="phase2" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Phase 2: Parachute Descent</h2>
+                <p>
+                    Once the vehicle decelerates to roughly Mach 2 (v = 400 m/s at h &lt; 15 km), the heat shield is jettisoned and a Disk-Gap-Band (DGB) supersonic parachute deploys. This architecture has been used on every successful Mars lander - Viking, Pathfinder, MER, Phoenix, MSL, and Perseverance all rely on a DGB chute to bridge the gap between hypersonic aeroshell entry and the low-speed regime where powered descent becomes practical.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">DGB Parachute Model</h3>
+                <p>
+                    The parachute is modeled as a constant drag-area device. The drag force has exactly the same form as the aeroshell but with the chute's own coefficient and reference area:
+                </p>
+                <div id="latexelements">
+                    \[
+                        F_D = \tfrac{1}{2}\,\rho\, v^2\, C_{D,p}\, A_p
+                    \]
+                </div>
+                <p>
+                    with \(C_{D,p} = 0.6\) and \(D_p = 21.5\) m giving \(A_p = \pi(D_p/2)^2 \approx 363\) m². The drag vector opposes velocity, so the component equations are identical to the aeroshell phase.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">State Vector and Equations of Motion</h3>
+                <p>
+                    Heat shield ablation is complete by the time the chute deploys, so the state vector drops to four variables - no mass change occurs during parachute descent:
+                </p>
+                <div id="latexelements">
+                    \[
+                        \mathbf{s} = \begin{bmatrix} r \\ \theta \\ v_r \\ v_\theta \end{bmatrix}
+                    \]
+                </div>
+                <p>
+                    The equations of motion are identical to Phase 1 (same Coriolis, centrifugal, and curvature terms) but with the chute drag area replacing the aeroshell area, and a fixed vehicle mass \(m_\mathrm{desc}\) - the combined mass of the descent stage plus lander minus the backshell that was jettisoned with the heat shield.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Termination: Powered Descent Initiation (PDI)</h3>
+                <p>
+                    The parachute phase terminates at \(h = 1500\) m - the Powered Descent Initiation (PDI) altitude. At this point the backshell and chute are jettisoned and the powered descent engines ignite. PDI at 1.5 km is consistent with the MSL architecture; Perseverance used a similar altitude.
+                </p>
+
+               <!--<table class="data-table">
+                    <thead>
+                        <tr><th>Parameter</th><th>Symbol</th><th>Value</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Chute drag coefficient</td><td>\(C_{D,p}\)</td><td>0.6</td><td>Typical DGB supersonic chute value</td></tr>
+                        <tr><td>Chute diameter</td><td>\(D_p\)</td><td>21.5 m</td><td>MSL-class parachute</td></tr>
+                        <tr><td>PDI altitude</td><td>\(h_\mathrm{PDI}\)</td><td>1500 m</td><td>Chute jettison / engine ignition trigger</td></tr>
+                        <tr><td>Deploy conditions</td><td>-</td><td>v &lt; 400 m/s, h &lt; 15 km</td><td>Approximate Mach 2 at Mars</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="result-highlight">
+                    <b>Phase 2 result:</b> The chute deploys once the vehicle crosses the Mach 2 threshold set by the event trigger. From there it decelerates steadily through the thin lower atmosphere, arriving at the PDI altitude with a velocity that depends on the entry conditions, descent mass, and chute parameters. The higher the ballistic coefficient of the descent stack, the faster the vehicle is still moving at PDI - which directly sets the propellant budget for Phase 3.
+                </div>--> 
+
+                <!-- 12. PHASE 3 -->
+                <h2 id="phase3" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Phase 3: Powered Descent - PDG</h2>
+                <p>
+                    From PDI at 1.5 km down to touchdown, the vehicle must decelerate from ~64 m/s to near-zero under rocket power alone - the atmosphere is too thin for drag to help meaningfully at this stage. This simulation implements a constant-deceleration PDG (Powered Descent Guidance) with proportional feedback: a computationally simple but physically motivated approach that guarantees a smooth, controlled descent profile and leaves propellant in the tanks at touchdown.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Constant-Deceleration Guidance Law</h3>
+                <p>
+                    The idea is to compute at PDI the constant deceleration \(a_\mathrm{PDG}\) that would take the vehicle from its entry speed down to the target touchdown speed \(V_{td}\) over the available altitude:
+                </p>
+                <div id="latexelements">
+                    \[
+                        a_\mathrm{PDG} = \frac{v_\mathrm{PDI}^2 - V_{td}^2}{2\, h_\mathrm{PDI}}
+                    \]
+                </div>
+                <p>
+                    From this, a kinematically consistent reference descent speed at any altitude \(h\) is:
+                </p>
+                <div id="latexelements">
+                    \[
+                        v_{r,\mathrm{tgt}}(h) = -\sqrt{V_{td}^2 + 2\,a_\mathrm{PDG}\cdot h}
+                    \]
+                </div>
+                <p>
+                    Thrust is then split into a vertical component (feedforward gravity + deceleration, plus a proportional error term) and a small tangential component to bleed off residual horizontal speed:
+                </p>
+                <div id="latexelements">
+                    \[
+                        T_r = m\,(g + a_\mathrm{PDG}) + K_P\,m\,(v_{r,\mathrm{tgt}} - v_r)
+                    \]
+                    \[
+                        T_\theta = K_\mathrm{tang}\cdot v_\theta
+                    \]
+                </div>
+                <p>
+                    where \(K_P = 3\) s⁻¹ is the proportional gain. The \((v_{r,\mathrm{tgt}} - v_r)\) error term corrects any deviation from the reference profile - if the vehicle is descending too fast, thrust increases; too slow, it decreases. Total thrust is clipped to \([0, T_\mathrm{max}]\) and the direction normalised. With \(T_\mathrm{max} = 12{,}000\) N and propellant budget \(m_p = 400\) kg, the vehicle reaches the surface at ~3 m/s with ~200 kg of propellant remaining.
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Equations of Motion with Thrust</h3>
+                <p>
+                    The state vector gains a fifth variable - propellant mass \(m_p\):
+                </p>
+                <div id="latexelements">
+                    \[
+                        \mathbf{s} = \begin{bmatrix} r \\ \theta \\ v_r \\ v_\theta \\ m_p \end{bmatrix}
+                    \]
+                </div>
+                <p>
+                    The thrust force components in the retrograde direction are:
+                </p>
+                <div id="latexelements">
+                    \[
+                        T_r = T\,\left(\frac{-v_r}{v}\right), \qquad T_\theta = T\,\left(\frac{-v_\theta}{v}\right)
+                    \]
+                </div>
+                <p>
+                    These replace the drag terms in the \(\dot{v}_r\) and \(\dot{v}_\theta\) equations. Propellant is consumed via the standard rocket equation using specific impulse:
+                </p>
+                <div id="latexelements">
+                    \[
+                        \dot{m}_p = -\frac{T}{I_{sp}\, g_0}
+                    \]
+                </div>
+                <p>
+                    where \(I_{sp}\) is the specific impulse and \(g_0 = 9.80665\) m/s² (standard gravity - a conventional reference for specific impulse, not Mars gravity).
+                </p>
+
+                <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Why PDG Leaves Fuel at Touchdown</h3>
+                <p>
+                    Unlike a pure gravity turn (which throttles at maximum until fuel is gone), the PDG controller throttles proportionally to the tracking error. Once the vehicle is riding the reference profile, the thrust required is exactly \(m(g + a_\mathrm{PDG})\) - which for Mars gravity and the chosen deceleration profile is well below \(T_\mathrm{max}\). Propellant consumption is therefore proportional to the actual manoeuvre energy, not the maximum available, so the vehicle arrives at the surface with roughly half its propellant budget intact.
+                </p>
+
+               <!-- <table class="data-table">
+                    <thead>
+                        <tr><th>Parameter</th><th>Symbol</th><th>Value</th><th>Notes</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Max thrust</td><td>\(T_\max\)</td><td>10,000 N</td><td>Total engine thrust at full throttle</td></tr>
+                        <tr><td>Specific impulse</td><td>\(I_{sp}\)</td><td>220 s</td><td>Hypergolic propellant class</td></tr>
+                        <tr><td>Propellant mass</td><td>\(m_p\)</td><td>200 kg</td><td>Initial load at PDI</td></tr>
+                        <tr><td>Thrust taper speed</td><td>\(\varepsilon_v\)</td><td>2 m/s</td><td>Below this, thrust scales linearly with speed</td></tr>
+                        <tr><td>T/W at PDI</td><td>-</td><td>~1.36</td><td>Thrust-to-weight ratio at powered descent initiation</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="result-highlight">
+                    <b>Phase 3 result:</b> The engine burns through the propellant load decelerating the vehicle from the PDI velocity down toward zero. The outcome depends on T/W ratio, available propellant, and PDI conditions: if T/W is too low or propellant too scarce, fuel runs out above the surface and the vehicle free-falls the remaining altitude to touchdown. The simulation tracks both sub-phases (powered and free-fall) and reports the final touchdown velocity, which is the key figure of merit for this phase.
+                </div>-->
+
+                <!-- 13. RESULTS -->
                 <h2 id="results" style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">Simulation Results</h2>
 
+
                 <p>
-                    For each run the simulator outputs: altitude, speed, and flight path angle over time; stagnation heat flux and integrated heat load; axial g-load and dynamic pressure; heat shield remaining mass; and the full 9-panel summary figure. The termination condition (chute deploy vs. ground impact) and the time/altitude at which it triggers are also reported.
+                    The simulator outputs all three phases in a single 9-panel figure: altitude and velocity histories, entry corridor (velocity vs. altitude), stagnation heat flux, axial g-load, dynamic pressure, heat shield ablation, the full curved-surface trajectory, and a summary table. An animated video shows the real-time trajectory sweep with live telemetry readouts including propellant remaining during Phase 3.
                 </p>
 
                 <div class="media-grid">
@@ -604,14 +749,16 @@
                     <li><b>Zero angle of attack assumed</b> - a real capsule has a non-zero trim angle to generate lift, enabling corridor widening and landing ellipse reduction.</li>
                     <li><b>Exponential atmosphere</b> - the real Mars atmosphere varies with season, latitude, longitude, and dust storm activity. Mission design uses full MOLA-based atmosphere models.</li>
                     <li><b>Simple ablation model</b> - the energy balance ignores radiative heat flux (significant above ~7 km/s), pyrolysis gas injection ("blowing"), and char layer thermal conduction.</li>
-                    <li><b>No parachute / retropropulsion phase</b> - the simulation terminates at Mach 2 chute deploy. simulating final descent and landing requires active control, powered descent and steering simulation, which is a more complex 6DOF problem - a project for another time!  </li>
+                    <li><b>No skycrane</b> - the simulation models direct touchdown. The actual MSL and Perseverance landing sequences use a skycrane - a hovering rocket platform that lowers the rover on cables. I didnt see the point in adding it since it'd just mean the powered descent would bring the vehicle to a hover at a higher altitude and then cables would be deployed. not the goal behind this project</li>
+                    <li><b>Constant parachute drag coefficient</b> - real DGB chutes have a dynamic \(C_D\) that varies with Mach number, canopy inflation state, and oscillation. The constant-\(C_D\) model is a reasonable engineering average but doesn't capture transient inflation loads.</li>
                 </ul>
 
                 <h3 style="font-size:1.5rem; font-weight:600; margin-top:2rem; margin-bottom:0.4rem;">Possible Extensions</h3>
                 <ul class="titled-list">
-                    <li><b>Add lift force:</b> \(F_L = \frac{1}{2}\rho v^2 C_L A_{ref}\), with \(C_L\) from aerodatabase tables - enables 3-DOF bank-angle guidance simulation.</li>                
+                    <li><b>Add lift force:</b> \(F_L = \frac{1}{2}\rho v^2 C_L A_{ref}\), with \(C_L\) from aerodatabase tables - enables 3-DOF bank-angle guidance simulation.</li>
                     <li><b>Add radiative heating:</b> at speeds above ~6 km/s, radiation from the hot shock layer becomes the dominant heat flux mechanism. The Tauber-Sutton model adds this.</li>
-                    <li><b>Full 6-DOF:</b> add pitch, roll, yaw dynamics - required for modeling RCS thruster firings and bank-angle control.</li>
+                    <li><b>Fuel-optimal guidance (G-FOLD):</b> replace the constant-deceleration PDG with a convex-optimization-based guidance law that minimises propellant consumption while pinpointing a specific landing site - the class of algorithm flown on Perseverance.</li>
+                    <li><b>Full 6-DOF:</b> add pitch, roll, yaw dynamics - required for modeling RCS thruster firings, bank-angle control, and skycrane separation mechanics.</li>
                 </ul>
 
                 <!-- ─────────────────────────────────────── 15. GLOSSARY -->
@@ -638,6 +785,11 @@
                         <tr><td>Stagnation point</td><td>The point on the vehicle where flow velocity is zero - maximum pressure and heating</td></tr>
                         <tr><td>Sutton-Graves</td><td>Semi-empirical equation for stagnation-point convective heat flux: \(\dot{q} = k\sqrt{\rho/R_n}\,v^3\)</td></tr>
                         <tr><td>TPS</td><td>Thermal Protection System - the heat shield and all insulation protecting the spacecraft</td></tr>
+                        <tr><td>DGB</td><td>Disk-Gap-Band - the standard supersonic parachute design used on all Mars landers; named for its disk canopy, gap, and cylindrical band</td></tr>
+                        <tr><td>PDI</td><td>Powered Descent Initiation - the altitude at which the parachute is jettisoned and the descent engines ignite</td></tr>
+                        <tr><td>PDG</td><td>Powered Descent Guidance - a guidance law for the powered landing phase; this simulation uses a constant-deceleration profile with proportional feedback, a simplified precursor to the fuel-optimal G-FOLD algorithm</td></tr>
+                        <tr><td>Isp</td><td>Specific impulse - a measure of propellant efficiency; \(I_{sp} = T / (\dot{m}\,g_0)\) in seconds. Higher Isp means more thrust per unit propellant consumed.</td></tr>
+                        <tr><td>Skycrane</td><td>The landing system used on MSL and Perseverance: a hovering rocket stage that lowers the rover to the surface on cables, then flies away</td></tr>
                     </tbody>
                 </table>
 
