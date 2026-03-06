@@ -527,6 +527,33 @@ ul.cv-desc li {
 }
 
 
+/* === Skills grid (categorized) === */
+
+.cv-skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    margin-top: 4px;
+}
+
+.cv-skills-cat {
+    margin-bottom: 16px;
+}
+
+.cv-skills-cat-title {
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.cv-skills-cat-items {
+    font-size: 1.35rem;
+    color: var(--text-light);
+    line-height: 1.65;
+}
+
+
 /* === Responsive === */
 
 @media (max-width: 640px) {
@@ -575,5 +602,9 @@ ul.cv-desc li {
 
     .cv-skills {
         justify-content: flex-start;
+    }
+
+    .cv-skills-grid {
+        grid-template-columns: 1fr;
     }
 }
