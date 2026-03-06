@@ -1,0 +1,20 @@
+# Redirect old .html URLs to clean URLs
+/resume.html                            /resume                         301
+/about.html                             /about                          301
+/courses.html                           /courses                        301
+/Courses.html                           /courses                        301
+/Blogs/Blogindex.html                   /blogs                          301
+/Blogs/Hello_world.html                 /blogs/hello-world              301
+/Blogs/MarsEDL.html                     /blogs/mars-edl                 301
+/Blogs/PywebCFD.html                    /blogs/pyweb-cfd                301
+/Blogs/Tsiolkovsky rocket equation.html /blogs/tsiolkovsky-rocket-equation 301
+
+# Serve clean URLs from the actual .html files
+/resume                             /resume.html                            200
+/about                              /about.html                             200
+/courses                            /Courses.html                           200
+/blogs                              /Blogs/Blogindex.html                   200
+/blogs/hello-world                  /Blogs/Hello_world.html                 200
+/blogs/mars-edl                     /Blogs/MarsEDL.html                     200
+/blogs/pyweb-cfd                    /Blogs/PywebCFD.html                    200
+/blogs/tsiolkovsky-rocket-equation  /Blogs/Tsiolkovsky rocket equation.html 200
