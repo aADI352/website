@@ -31,8 +31,8 @@
                 <br>
                 <p>
                     During the shift to online learning imposed by the geopolitical situation, I found myself with 
-                    a lot of free time. so I decided to experienment with CFD solvers, and that led me to the creation of PywebCFD, my first ever web-based interactive FDM CFD solver.<br><br>
-                    A little background, PywebCFD is a <i>Finite Difference Method (FDM)</i> solver that numerically solves the flow equations, specifically oprimised for incompressible flows. 
+                    a lot of free time. so I decided to experiment with CFD solvers, and that led me to the creation of PywebCFD, my first ever web-based interactive FDM CFD solver.<br><br>
+                    A little background, PywebCFD is a <i>Finite Difference Method (FDM)</i> solver that numerically solves the flow equations, specifically optimised for incompressible flows. 
                     it is built using python (with streamlit container).<br><br>
                     the main challenge for me as a first year undergraduate student, was to polish my understanding of the flow equations, and then 
                     finish them by learning how to solve them numerically.<br><br>
@@ -42,18 +42,17 @@
                     2. even without the the need for web hosting levels of efficiency, I faced stability issues. this was due to the solver's cartesian grid trying to encompass the curved geometry (stepping inaccuracies). after playing 
                     with CFL conditions, relaxation and different time step lengths, I managed to make it reasonably stable, although much work is still needed to make it more robust. <br>    
 
-                    3. data visulisation: I wanted to be able to visualise the flow field in a smooth manner that didnt kill performance. after lots 
-                    of experienmentation I found that using the matplotlib library to generate a static image of the flow field, and then updating frequently 
+                    3. data visualisation: I wanted to be able to visualise the flow field in a smooth manner that didnt kill performance. after lots 
+                    of experimentation I found that using the matplotlib library to generate a static image of the flow field, and then updating frequently 
                   enough was a surprisingly good solution.  <br><br>
-                My objectives for the forseeible future: <br><br>
+                My objectives for the foreseeable future: <br><br>
               1. switch to IMEX (implicit explicit) schemes, with higher order interpolation.<br>
               2. ditch boolean masks for the geometry, and switch to an immersed boundary method. Still cracking this one-any suggestions are welcome! <br>
               3. adressing stability and efficiency issues.<br><br>
-You will difenetly see another blog about this topic, as it really piqued my interest and I have a lot to learn. it was difenetly a very steep learning curve. 
+You will definitely see another blog about this topic, as it really piqued my interest and I have a lot to learn. it was definitely a very steep learning curve. 
 <br><br>
 
-you can try it out (you need to have lots of patience though) in <a href="https://pywebfdm.replit.app/"> this link</a> </br>
-update : I stopped hosting it, contact me for src code. 
+ I stopped hosting it, contact me for src code. 
 
 </p>
 
