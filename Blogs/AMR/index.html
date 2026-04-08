@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GS20Y8XJKS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GS20Y8XJKS');
+</script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌠</text></svg>">
+        <link rel="stylesheet" type="text/css" href="../blogstyle.css">
+        <title>What I've Been Up To Lately - Adi Atrash</title>
+
+        <style>
+            /* 3-column rocket grid */
+            .rocket-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin: 30px 0;
+            }
+            /* 2+3 capsule grid */
+            .capsule-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+                margin: 30px 0;
+            }
+            .capsule-grid-lower {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin: 0 0 30px 0;
+            }
+            .rocket-grid img,
+            .capsule-grid img,
+            .capsule-grid-lower img {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+                display: block;
+            }
+            .rocket-grid img:hover,
+            .capsule-grid img:hover,
+            .capsule-grid-lower img:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+            }
+            .grid-caption {
+                font-size: 0.82rem;
+                color: var(--text-muted, #777);
+                text-align: center;
+                margin-top: 5px;
+                font-style: italic;
+            }
+            @media (max-width: 700px) {
+                .rocket-grid { grid-template-columns: 1fr; }
+                .capsule-grid { grid-template-columns: 1fr; }
+                .capsule-grid-lower { grid-template-columns: 1fr; }
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="header">
+            <h1 class="nametl"><a href="https://adidi.at">Adi Atrash</a></h1>
+            <img class="avatar" src="../../1713938565415.jpg" alt="profile picture of adi atrash">
+            <a href="/about" class="abt">About</a>
+            <a href="../" class="abt">Blog</a>
+            <a href="../../resume/" class="abt">Resume</a>
+        </div>
+
+        <div class="mainhw">
+            <div class="top">
+                <h1>Adjoint vs Feature-Based vs Uniform adaptive mesh refinement at different Mach regimes</h1>
+                <br>
+                <b>2026-04-02 22:46:21</b>
+                <br><br>
+                <p>In this blog I compare different adaptive mesh refinement (AMR) strategies for external aerodynamics across differnt mach (and velocity regimes). these different stratigies are : 1) adjoint (output) based adaptive mesh refinment, 2) feature based adaptive mesh refinement, 3) regular adaptive mesh refinment. </p>
+                <!-- ─────────── ROCKET SECTION ─────────── -->
+                <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">The rocket</h2>
+                <p>
+                    [write something about the rocket here]
+                </p>
+
+                <div class="rocket-grid">
+                    <div>
+                        <img src="src/rocket_top.png" alt="SLS rocket top-down view - pressure coefficient and Schlieren">
+                        <p class="grid-caption">Top-down view — pressure coefficient + Schlieren</p>
+                    </div>
+                    <div>
+                        <img src="src/rocket_3d.png" alt="SLS rocket 3D view - pressure coefficient and pressure field">
+                        <p class="grid-caption">3D view — pressure coefficient + pressure field</p>
+                    </div>
+                    <div>
+                        <img src="src/rocket_angled.png" alt="SLS rocket angled 3D view - pressure coefficient and Schlieren">
+                        <p class="grid-caption">Angled 3D view — pressure coefficient + Schlieren</p>
+                    </div>
+                </div>
+
+                <!-- ─────────── CAPSULE SECTION ─────────── -->
+                <h2 style="font-size:2rem; font-weight:600; margin-top:3rem; margin-bottom:0.5rem;">The capsule</h2>
+                <p>
+                    [write something about the capsule here]
+                </p>
+
+                <!-- Top row: 2 images -->
+                <div class="capsule-grid">
+                    <div>
+                        <img src="src/capsule_schlieren.png" alt="Capsule - Schlieren visualization">
+                        <p class="grid-caption">Schlieren</p>
+                    </div>
+                    <div>
+                        <img src="src/capsule_schlieren2.png" alt="Capsule - Schlieren with bow shock">
+                        <p class="grid-caption">Schlieren — bow shock detail</p>
+                    </div>
+                </div>
+                <!-- Bottom row: 3 images -->
+                <div class="capsule-grid-lower">
+                    <div>
+                        <img src="src/capsule_temperature.png" alt="Capsule - temperature field (K)">
+                        <p class="grid-caption">Temperature (K)</p>
+                    </div>
+                    <div>
+                        <img src="src/capsule_density.png" alt="Capsule - density ratio ρ/ρ∞">
+                        <p class="grid-caption">Density ratio ρ/ρ∞</p>
+                    </div>
+                    <div>
+                        <img src="src/capsule_velocity.png" alt="Capsule - velocity magnitude |U|/U∞">
+                        <p class="grid-caption">Velocity |U|/U∞</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="nav">
+            <ul>
+                <li><a href="https://x.com/AtrashAdi"><span>twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/adi-atrash-6857b1197/"><span>linkedin</span></a></li>
+                <li><a href="https://github.com/aADI352"><span>github</span></a></li>
+                <li><a href="../../Courses/"><span>courses</span></a></li>
+                <li><a href="../../resume/"><span>resume</span></a></li>
+            </ul>
+        </div>
+
+        <div id="footer">&copy; 2026 Adi Atrash</div>
+
+        <!-- Modal lightbox (same as MSL blog) -->
+        <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+        </div>
+
+        <script>
+            const modal    = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const closeBtn = document.getElementsByClassName('close')[0];
+
+            document.querySelectorAll('.rocket-grid img, .capsule-grid img, .capsule-grid-lower img').forEach(img => {
+                img.addEventListener('click', function () {
+                    modal.style.display = 'block';
+                    modalImg.src = this.src;
+                    modalImg.alt = this.alt;
+                });
+            });
+
+            closeBtn.addEventListener('click', () => modal.style.display = 'none');
+            modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && modal.style.display === 'block') modal.style.display = 'none';
+            });
+        </script>
+
+    </body>
+</html>
