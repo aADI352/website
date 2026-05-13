@@ -16,6 +16,32 @@
         <title>What I've Been Up To Lately - Adi Atrash</title>
 
         <style>
+            /* formula student grid */
+            .fs-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin: 30px 0;
+            }
+            .fs-grid img {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                cursor: pointer;
+                transition: transform 0.2s, box-shadow 0.2s;
+                display: block;
+            }
+            .fs-grid img:hover {
+                transform: scale(1.02);
+                box-shadow: 0 4px 18px rgba(0,0,0,0.13);
+            }
+            @media (max-width: 700px) {
+                .fs-grid { grid-template-columns: 1fr; }
+                .rocket-grid { grid-template-columns: 1fr; }
+                .capsule-grid { grid-template-columns: 1fr; }
+                .capsule-grid-lower { grid-template-columns: 1fr; }
+            }
             /* 3-column rocket grid */
             .rocket-grid {
                 display: grid;
@@ -79,15 +105,23 @@
 
         <div class="mainhw">
             <div class="top">
-                <h1>Adjoint vs Feature-Based vs Uniform adaptive mesh refinement at different Mach regimes</h1>
+                <h1>Recent CFD work I have been working on</h1>
                 <br>
                 <b>2026-04-02 22:46:21</b>
                 <br><br>
-                <p>In this blog I compare different adaptive mesh refinement (AMR) strategies for external aerodynamics across differnt mach (and velocity regimes). these different stratigies are : 1) adjoint (output) based adaptive mesh refinment, 2) feature based adaptive mesh refinement, 3) regular adaptive mesh refinment. </p>
+                <p>Thought I would share sneak peeks into my recent CFD work, the two main projects being formula student aerodynamics and adaptive mesh refinement techniques for external aerodynamics across different Mach (and velocity) regimes. <br>These different strategies are:
+                   <br> <ul>
+                        <li>1) adjoint (output) based adaptive mesh refinement</li>
+                        <li>2) feature based adaptive mesh refinement</li>
+                        <li>3) regular adaptive mesh refinement</li>
+                    </ul> <br>
+                    <p> As the project is still in progress, the results are to come in a separate future blog</p>
+                   
+                </p>
                 <!-- ─────────── ROCKET SECTION ─────────── -->
                 <h2 style="font-size:2rem; font-weight:600; margin-top:2.5rem; margin-bottom:0.5rem;">The rocket</h2>
                 <p>
-                    [write something about the rocket here]
+                    SLS at at mach 1.5, using spallart allmaras turbulence model, with a 2nd order finite volume method and Roe's flux differencing. The adjoint-based AMR is based on the drag coefficient as the output of interest, while the feature-based AMR is based on density gradients.
                 </p>
 
                 <div class="rocket-grid">
@@ -108,7 +142,7 @@
                 <!-- ─────────── CAPSULE SECTION ─────────── -->
                 <h2 style="font-size:2rem; font-weight:600; margin-top:3rem; margin-bottom:0.5rem;">The capsule</h2>
                 <p>
-                    [write something about the capsule here]
+                    MSL lab at mach 28, using K-ω SST turbulence model and same numerical methods as the SLS rocket.
                 </p>
 
                 <!-- Top row: 2 images -->
@@ -138,6 +172,38 @@
                     </div>
                 </div>
 
+                <!-- ─────────── FORMULA STUDENT SECTION ─────────── -->
+                <h2 style="font-size:2rem; font-weight:600; margin-top:3rem; margin-bottom:0.5rem;">Formula Student</h2>
+                <p>
+                    A formula student car tested in various conditions, including an LES study to examine vortex structures, cornering study to test performance in cornering condtions, and straight wind tunnel study. all RANS studies use k-ω SST turbulence model.
+                </p>
+
+                <div class="fs-grid">
+                    <div>
+                        <img src="src/fs_full_car.png" alt="LES (large eddy simulation) of a formula student car - velocity isosurfaces">
+                        <p class="grid-caption">LES (large eddy simulation) of a formula student car - velocity isosurfaces</p>
+                    </div>
+                    <div>
+                        <img src="src/fs_cornering_top.png" alt="Cornering simulation- rotating tunnel">
+                        <p class="grid-caption">Cornering simulation- rotating tunnel</p>
+                    </div>
+                    <div>
+                        <img src="src/fs_cornering_streamlines_side.png" alt="Cornering simulation- rotating tunnel">
+                        <p class="grid-caption">Cornering simulation- rotating tunnel</p>
+                    </div>
+                    <div>
+                        <img src="src/fs_cornering_streamlines_rear.png" alt="Cornering simulation- rotating tunnel">
+                        <p class="grid-caption">CCornering simulation- rotating tunnel</p>
+                    </div>
+                    <div>
+                        <img src="src/fs_vortices.png" alt="Formula Student - vortex and rea wake structures">
+                        <p class="grid-caption">Formula Student - vortex and rea wake structures</p>
+                    </div>
+                </div>
+
+                <p> Detailed results andanalysis will be published soon once all projects are completed. Stay tuned!</p>
+                
+
             </div>
         </div>
 
@@ -164,7 +230,7 @@
             const modalImg = document.getElementById('modalImage');
             const closeBtn = document.getElementsByClassName('close')[0];
 
-            document.querySelectorAll('.rocket-grid img, .capsule-grid img, .capsule-grid-lower img').forEach(img => {
+            document.querySelectorAll('.rocket-grid img, .capsule-grid img, .capsule-grid-lower img, .fs-grid img').forEach(img => {
                 img.addEventListener('click', function () {
                     modal.style.display = 'block';
                     modalImg.src = this.src;
