@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FT26E — live tracker &amp; pit crew</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -201,6 +201,65 @@ dialog .body{padding:20px 26px 24px}
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--color-neutral-900);color:var(--color-neutral-200);
   padding:10px 20px;font-size:12px;display:flex;align-items:center;gap:10px;z-index:1200}
 .bar b{color:var(--color-accent-100)}
+
+/* ---------- responsive ---------- */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll table{min-width:420px}
+
+@media (max-width:760px){
+  .wrap{padding:20px 14px 92px;gap:22px}
+  .top{align-items:stretch}
+  .top h1{font-size:44px;margin-top:4px}
+  .pill{width:100%;justify-content:space-between;padding:8px 10px 8px 14px}
+  .pill #whoLabel{margin-left:auto}
+
+  .pass .main{flex:1 1 100%;padding:20px 18px;gap:18px}
+  .pass .code{font-size:40px}
+  .pass .line{flex:1 1 70px;min-width:60px}
+  .stub{flex:1 1 100%;border-left:0;border-top:2px dashed var(--color-neutral-400);
+    flex-direction:row;align-items:flex-end;justify-content:space-between;padding:20px 18px}
+  .stub .notch{top:-11px;bottom:auto}
+  .stub .notch.t{left:-11px}
+  .stub .notch.b{left:auto;right:-11px}
+  .stub .seat{font-size:28px}
+  .bars{height:44px} .bars span{height:44px}
+
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;padding-bottom:2px;margin:0 -14px;padding-left:14px;padding-right:14px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{white-space:nowrap;flex:none}
+
+  .card{padding:18px 16px;border-radius:22px}
+  h2.sect{font-size:24px}
+  #map{height:250px}
+
+  .leg{gap:4px 12px;padding:12px 0}
+  .leg .sector{font-size:19px;min-width:0;flex:1 1 100%}
+  .leg .bits{flex:1 1 100%;font-size:12px;gap:2px 12px}
+
+  .days{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .days::-webkit-scrollbar{display:none}
+  .days button{flex:none}
+  .sched li{grid-template-columns:54px 1fr;gap:10px}
+  .sched .tm{font-size:14px}
+
+  .checks{grid-template-columns:1fr}
+  .filters{grid-template-columns:1fr 1fr}
+  .big .n{font-size:34px}
+  .task .row .btn{flex:1 1 auto}
+
+  details .cnt{padding-left:16px}
+  .bar{padding:8px 14px calc(8px + env(safe-area-inset-bottom));font-size:11px;line-height:1.3}
+  #sync{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
+    -webkit-line-clamp:2;-webkit-box-orient:vertical}
+}
+
+@media (max-width:420px){
+  .top h1{font-size:38px}
+  .pass .code{font-size:34px}
+  .filters{grid-template-columns:1fr}
+  .big{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -285,11 +344,11 @@ dialog .body{padding:20px 26px 24px}
       <div class="card"><div class="checks" id="checksGrid"></div>
         <p class="muted" style="font-size:12px;margin:14px 0 0" id="checkHint"></p></div></section>
     <section><h2 class="sect">Dynamic events</h2>
-      <div class="card"><table><thead><tr><th>Event</th><th>Result</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
-      <tbody id="dyn"></tbody></table></div></section>
+      <div class="card"><div class="scroll"><table><thead><tr><th>Event</th><th>Result</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
+      <tbody id="dyn"></tbody></table></div></div></section>
     <section><h2 class="sect">Static events</h2>
-      <div class="card"><table><thead><tr><th>Event</th><th>Note</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
-      <tbody id="stat"></tbody></table></div></section>
+      <div class="card"><div class="scroll"><table><thead><tr><th>Event</th><th>Note</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
+      <tbody id="stat"></tbody></table></div></div></section>
     <section><h2 class="sect">Overall</h2>
       <div class="card"><div class="big">
         <div><div class="kicker">Rank</div><div class="n" id="ovRank">—</div></div>
@@ -459,7 +518,7 @@ const CONFIG = {
   adminUser: "FTadmin",
   adminPassword: "FTadmin"
 };
-const BUILD = "2026-08-14j";   // shown in the diagnostics popup
+const BUILD = "2026-08-14k";   // shown in the diagnostics popup
 
 /* Crew list. Sign in with any of these names + the crew password.
    Admin can change the list in-app: Tasks -> Edit crew list. */
