@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Celine — live tracker &amp; pit crew</title>
+<title>FT26E — live tracker &amp; pit crew</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -207,7 +207,7 @@ dialog .body{padding:20px 26px 24px}
 <div class="wrap">
 
   <header class="top">
-    <div><div class="kicker">Where is</div><h1>Celine</h1></div>
+    <div><div class="kicker">Where is</div><h1>FT26E</h1></div>
     <div class="pill">
       <span class="dot"></span>
       <span style="font:600 13px/1 var(--font-body)" id="liveLabel">In transit</span>
@@ -234,7 +234,6 @@ dialog .body{padding:20px 26px 24px}
         <div><div class="code" id="dest">ZAG</div><div class="city" id="destCity">Zagreb</div></div>
       </div>
       <div class="facts">
-        <div><div class="kicker">Air waybill</div><div class="v">501-20737345</div></div>
         <div><div class="kicker">Pieces</div><div class="v">3</div></div>
         <div><div class="kicker">Current leg</div><div class="v" id="curFlight">—</div></div>
         <div><div class="kicker">Next up</div><div class="v" id="nextUp">—</div></div>
@@ -246,7 +245,7 @@ dialog .body{padding:20px 26px 24px}
         <div class="kicker" style="color:var(--color-accent-700)">Seat</div>
         <div class="seat">3 PCS</div>
         <div style="font:500 12px/1.4 var(--font-body);color:var(--color-accent-800);margin-top:8px">
-          Celine / FS car + spares</div>
+          FT26E + spares</div>
       </div>
       <div class="bars" id="bars"></div>
     </div>
@@ -309,7 +308,6 @@ dialog .body{padding:20px 26px 24px}
           <div><div class="kicker">At the pit</div><div class="v" id="kPit">—</div></div>
           <div><div class="kicker">First event</div><div class="v" id="kFirst">—</div></div>
           <div><div class="kicker">Drivers</div><div class="v" id="kDrivers">—</div></div>
-          <div style="grid-column:1/-1"><div class="kicker">Radios (4)</div><div class="v" id="kRadios">—</div></div>
         </div>
         <div class="adminbox hide">
           <h4>Edit the call</h4>
@@ -319,7 +317,6 @@ dialog .body{padding:20px 26px 24px}
             <div class="field"><label for="eFirst">First event</label><input class="input" id="eFirst"></div>
             <div class="field"><label for="eDrivers">Drivers</label><input class="input" id="eDrivers"></div>
           </div>
-          <div class="field" style="margin-top:10px"><label for="eRadios">Radio holders</label><input class="input" id="eRadios"></div>
           <button class="btn btn-primary btn-sm" id="saveCall">Save</button>
         </div>
       </div>
@@ -430,7 +427,7 @@ dialog .body{padding:20px 26px 24px}
 <dialog id="login">
   <div class="head">
     <div class="kicker" style="color:var(--color-accent-700)">Pit crew access</div>
-    <h3>Celine</h3>
+    <h3>FT26E</h3>
     <span class="notch l"></span><span class="notch r"></span>
   </div>
   <div class="body">
@@ -462,7 +459,7 @@ const CONFIG = {
   adminUser: "FTadmin",
   adminPassword: "FTadmin"
 };
-const BUILD = "2026-08-14f";   // shown in the diagnostics popup
+const BUILD = "2026-08-14j";   // shown in the diagnostics popup
 
 /* Crew list. Sign in with any of these names + the crew password.
    Admin can change the list in-app: Tasks -> Edit crew list. */
@@ -729,7 +726,6 @@ const READBACK = [
   "Everyone knows tomorrow's wake-up time",
   "Everyone knows when they must be at the pit",
   "The drivers know their schedule",
-  "All four radios are assigned and charging",
   "Nothing is blocking the car or the team without a plan"
 ];
 
@@ -745,7 +741,7 @@ const DEFAULTS = {
   members: MEMBERS,
   tasks: [],
   schedule: seedSchedule(),
-  call: {FSAA:{wake:"",pit:"",first:"",drivers:"",radios:""}, FSF:{wake:"",pit:"",first:"",drivers:"",radios:""}},
+  call: {FSAA:{wake:"",pit:"",first:"",drivers:""}, FSF:{wake:"",pit:"",first:"",drivers:""}},
   readback: {date:"", checks:READBACK.map(()=>false)}
 };
 
@@ -965,7 +961,7 @@ function renderPass(){
   const st = done === D.legs.length ? "At the paddock" : (a ? D.shipStatus : "On the ground");
   $("shipStatus").textContent = st;
   $("liveLabel").textContent = st;
-  let bars = ""; const digits = "50120737345".split("").map(Number);
+  let bars = ""; const digits = "31415926535".split("").map(Number);
   for(let i=0;i<26;i++){ const d = digits[i%digits.length];
     bars += `<span style="width:${1+((d+i*3)%4)}px;opacity:${0.55+((d+i)%5)*0.09}"></span>`; }
   $("bars").innerHTML = bars;
@@ -1102,12 +1098,11 @@ function renderCall(){
   $("kPit").textContent = c.pit || "—";
   $("kFirst").textContent = c.first || "—";
   $("kDrivers").textContent = c.drivers || "—";
-  $("kRadios").textContent = c.radios || "—";
-  ["Wake","Pit","First","Drivers","Radios"].forEach(k=>$("e"+k).value = c[k.toLowerCase()] || "");
+  ["Wake","Pit","First","Drivers"].forEach(k=>$("e"+k).value = c[k.toLowerCase()] || "");
 }
 $("saveCall").onclick = ()=>{
   D.call[ev] = {wake:$("eWake").value.trim(), pit:$("ePit").value.trim(), first:$("eFirst").value.trim(),
-    drivers:$("eDrivers").value.trim(), radios:$("eRadios").value.trim()};
+    drivers:$("eDrivers").value.trim()};
   save(); renderCall();
 };
 
