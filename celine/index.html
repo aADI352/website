@@ -440,7 +440,7 @@ dialog .body{padding:20px 26px 24px}
   </div>
 </dialog>
 
-<div class="bar"><span id="sync">connecting…</span></div>
+<div class="bar" title="Tap for connection details"><span id="sync">connecting…</span><span style="margin-left:auto;opacity:.6">tap for details</span></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -449,14 +449,15 @@ dialog .body{padding:20px 26px 24px}
    1. CONFIG
    ============================================================ */
 const CONFIG = {
-  supabaseUrl: "https://crlhaxxyaecsuggbbkle.supabase.co",
-  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNybGhheHh5YWVjc3VnZ2Jia2xlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2ODI2NjUsImV4cCI6MjEwMjI1ODY2NX0.gGgnuRgQqt32QLqFo7gEfMH_C_H9lYRyBK_qhvGtFZM",
+  supabaseUrl: "",
+  supabaseAnonKey: "",
   table: "celine_state",
   rowId: 1,
   crewPassword: "FTmember",
   adminUser: "FTadmin",
   adminPassword: "FTadmin"
 };
+
 const MEMBERS = Array.from({length:30}, (_,i)=>`Member ${String(i+1).padStart(2,"0")}`);
 
 const AIRPORTS = {
@@ -731,8 +732,31 @@ const AGENDA = [
 let D = clone(DEFAULTS);
 let me = null, isAdmin = false;
 let tab = "track", ev = "FSAA", day = null;
-let sb = null, mode = "local", map = null;
+let sb = null, mode = "local", map = null, lastError = "";
 const KEY = "celine:v3";
+const SESSION = "celine:session";
+
+/* Storage shim: Claude's preview exposes window.storage, a normal web host
+   exposes localStorage. Try both, fall back to memory. */
+const memStore = {};
+const store = {
+  async get(k){
+    try{ const r = await window.storage.get(k); if(r && r.value) return r.value; }catch(e){}
+    try{ const v = window.localStorage.getItem(k); if(v) return v; }catch(e){}
+    return memStore[k] || null;
+  },
+  async set(k,v){
+    memStore[k] = v;
+    try{ await window.storage.set(k,v); return "cloudpreview"; }catch(e){}
+    try{ window.localStorage.setItem(k,v); return "localStorage"; }catch(e){}
+    return "memory";
+  },
+  async del(k){
+    delete memStore[k];
+    try{ await window.storage.delete(k); }catch(e){}
+    try{ window.localStorage.removeItem(k); }catch(e){}
+  }
+};
 
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function $(id){ return document.getElementById(id); }
@@ -762,30 +786,48 @@ async function initBackend(){
       .subscribe();
     setInterval(pull, 30000);
   }else{
-    try{ const r = await window.storage.get(KEY);
-      if(r && r.value) D = merge(clone(DEFAULTS), JSON.parse(r.value)); }catch(e){}
-    setSync("local only — add Supabase keys to share");
+    try{ const v = await store.get(KEY); if(v) D = merge(clone(DEFAULTS), JSON.parse(v)); }catch(e){}
+    setSync("⚠ not connected to the database — changes stay on this device only");
   }
 }
 async function pull(){
   try{
-    const {data,error} = await sb.from(CONFIG.table).select("data").eq("id",CONFIG.rowId).single();
+    const {data,error} = await sb.from(CONFIG.table).select("data").eq("id",CONFIG.rowId).maybeSingle();
     if(error) throw error;
-    if(data && data.data && Object.keys(data.data).length){ D = merge(clone(DEFAULTS), data.data); render(); }
+    if(!data){
+      setSync("⚠ row " + CONFIG.rowId + " doesn't exist yet — sign in as admin and change anything to create it", true);
+      return;
+    }
+    if(data.data && Object.keys(data.data).length){ D = merge(clone(DEFAULTS), data.data); render(); }
     setSync("updated "+clock(), true);
-  }catch(e){ setSync("offline — showing last data", true); }
+  }catch(e){
+    lastError = e.message || String(e);
+    setSync("⚠ can't reach the database: " + lastError, true);
+  }
 }
 async function save(){
   if(mode === "cloud"){
     try{
-      const {error} = await sb.from(CONFIG.table)
-        .update({data:D, updated_at:new Date().toISOString()}).eq("id",CONFIG.rowId);
+      const {data, error} = await sb.from(CONFIG.table)
+        .upsert({id:CONFIG.rowId, data:D, updated_at:new Date().toISOString()})
+        .select("id");
       if(error) throw error;
-      setSync("saved "+clock(), true);
-    }catch(e){ setSync("save failed", true); }
+      if(!data || !data.length){
+        lastError = "the write touched 0 rows — check the row exists and the policies allow it";
+        setSync("⚠ nothing was saved: " + lastError, true);
+        return;
+      }
+      lastError = "";
+      setSync("saved " + clock(), true);
+    }catch(e){
+      lastError = (e.message || String(e)) + (e.hint ? " · " + e.hint : "");
+      setSync("⚠ save failed: " + lastError, true);
+    }
   }else{
-    try{ await window.storage.set(KEY, JSON.stringify(D)); setSync("saved "+clock()); }
-    catch(e){ setSync("this session only"); }
+    const where = await store.set(KEY, JSON.stringify(D));
+    setSync(where === "memory"
+      ? "⚠ nothing is being saved — this browser blocks storage"
+      : "saved on this device only · " + clock());
   }
 }
 
@@ -793,10 +835,26 @@ async function save(){
    3. LOGIN
    ============================================================ */
 const dlg = $("login");
+
+function applySession(){
+  document.body.classList.toggle("admin", isAdmin);
+  $("authBtn").textContent = me ? "Sign out" : "Crew sign-in";
+  $("whoLabel").textContent = me ? "· " + me + (isAdmin ? " (admin)" : "") : "· viewing";
+  document.querySelectorAll(".adminbox").forEach(b=>b.classList.toggle("hide", !isAdmin));
+}
+async function restoreSession(){
+  try{
+    const raw = await store.get(SESSION);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    if(s.admin){ me = "Admin"; isAdmin = true; }
+    else if(D.members.includes(s.name)){ me = s.name; isAdmin = false; }
+    applySession();
+  }catch(e){}
+}
+
 $("authBtn").onclick = ()=>{
-  if(me){ me=null; isAdmin=false; document.body.classList.remove("admin");
-    $("authBtn").textContent = "Crew sign-in"; $("whoLabel").textContent = "· viewing";
-    document.querySelectorAll(".adminbox").forEach(b=>b.classList.add("hide")); render(); return; }
+  if(me){ me=null; isAdmin=false; store.del(SESSION); applySession(); render(); return; }
   $("names").innerHTML = D.members.map(n=>`<option value="${esc(n)}">`).join("");
   dlg.showModal();
 };
@@ -817,10 +875,8 @@ function doLogin(){
     me = match; isAdmin = false;
   }
   $("pw").value = ""; err.textContent = ""; dlg.close();
-  document.body.classList.toggle("admin", isAdmin);
-  $("authBtn").textContent = "Sign out";
-  $("whoLabel").textContent = "· " + me + (isAdmin ? " (admin)" : "");
-  document.querySelectorAll(".adminbox").forEach(b=>b.classList.toggle("hide", !isAdmin));
+  store.set(SESSION, JSON.stringify({name:me, admin:isAdmin}));
+  applySession();
   if(!isAdmin) $("fOwner").value = me;
   render();
 }
@@ -1131,8 +1187,31 @@ function renderAgenda(){
     </details>`).join("");
 }
 
+/* diagnostics: click the status bar for the full picture */
+document.querySelector(".bar").onclick = async ()=>{
+  const lines = [
+    "Mode: " + (mode === "cloud" ? "connected to Supabase" : "LOCAL ONLY — no database"),
+    "supabaseUrl set: " + (CONFIG.supabaseUrl ? "yes" : "NO — this is why nothing saves"),
+    "anon key set: " + (CONFIG.supabaseAnonKey ? "yes" : "NO"),
+    "supabase library loaded: " + (window.supabase ? "yes" : "NO — the CDN script was blocked"),
+    "Signed in as: " + (me || "nobody") + (isAdmin ? " (admin)" : ""),
+    "Tasks in memory: " + D.tasks.length,
+    "Last error: " + (lastError || "none")
+  ];
+  if(mode === "cloud"){
+    try{
+      const {data, error} = await sb.from(CONFIG.table).select("id,updated_at").eq("id", CONFIG.rowId).maybeSingle();
+      lines.push(error ? "Read test FAILED: " + error.message
+        : !data ? "Read test OK, but ROW " + CONFIG.rowId + " DOES NOT EXIST — nothing can save until it does"
+        : "Read test OK · row last written " + (data.updated_at || "never"));
+    }catch(e){ lines.push("Read test FAILED: " + (e.message || e)); }
+  }
+  alert(lines.join("\n"));
+};
+
 (async function(){
   await initBackend();
+  await restoreSession();
   render();
   setTimeout(()=>{ if(map) map.invalidateSize(); }, 200);
 })();
