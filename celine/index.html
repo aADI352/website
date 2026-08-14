@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celine — live tracker &amp; pit crew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --color-bg:#f5ead8; --color-surface:#ebddc5; --color-text:#201e1d;
+  --color-accent:#c67139; --color-accent-2:#7a8a5e;
+  --color-divider:color-mix(in srgb,#201e1d 16%,transparent);
+  --color-neutral-100:#f9f4ed; --color-neutral-200:#eee7db; --color-neutral-300:#dcd3c4;
+  --color-neutral-400:#c0b6a5; --color-neutral-500:#a19786; --color-neutral-600:#82796a;
+  --color-neutral-700:#645c50; --color-neutral-800:#474238; --color-neutral-900:#2e2b25;
+  --color-accent-100:#fff2eb; --color-accent-600:#b2622d; --color-accent-700:#8c491a; --color-accent-800:#643312;
+  --color-accent-2-100:#f0fae1; --color-accent-2-600:#728157; --color-accent-2-700:#56633f; --color-accent-2-800:#3d472b;
+  --color-danger:#a33a2a; --color-danger-100:#fbe9e5;
+  --font-heading:"Caprasimo",system-ui,sans-serif;
+  --font-body:"Figtree",system-ui,sans-serif;
+  --space-1:4.4px; --space-2:8.8px; --space-3:13.2px; --space-4:17.6px; --space-6:26.4px;
+  --radius-sm:8px; --radius-md:16px; --radius-lg:28px;
+  --shadow-sm:0 1px 2px color-mix(in srgb,#2e2b25 14%,transparent);
+  --shadow-md:0 3px 10px color-mix(in srgb,#2e2b25 16%,transparent);
+  --shadow-lg:0 12px 32px color-mix(in srgb,#2e2b25 22%,transparent);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--color-bg);color:var(--color-text);
+  font-family:var(--font-body);font-size:15px;line-height:1.55}
+h1,h2,h3,h4{font-family:var(--font-heading);font-weight:400;line-height:1.12;letter-spacing:-.015em;margin:0}
+button,input,select,textarea{font-family:inherit;font-size:15px}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+::selection{background:color-mix(in srgb,var(--color-accent) 30%,transparent)}
+.kicker{font:600 10px/1 var(--font-body);letter-spacing:.16em;text-transform:uppercase;color:var(--color-neutral-600)}
+.muted{color:color-mix(in srgb,var(--color-text) 55%,transparent)}
+.hide{display:none !important}
+a{color:var(--color-accent);text-underline-offset:3px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+  text-decoration:none;font-family:var(--font-heading);font-size:14px;line-height:1.2;
+  color:var(--color-text);background:transparent;border:1px solid transparent;
+  padding:var(--space-2) calc(var(--space-3)*1.2);border-radius:var(--radius-md)}
+.btn-primary{background:var(--color-accent);color:var(--color-bg)}
+.btn-primary:hover{background:var(--color-accent-600)}
+.btn-secondary{border-color:var(--color-divider)}
+.btn-secondary:hover{background:color-mix(in srgb,var(--color-text) 7%,transparent)}
+.btn-ok{background:var(--color-accent-2);color:#fff;border-color:var(--color-accent-2)}
+.btn-ok:hover{background:var(--color-accent-2-600)}
+.btn-block{width:100%;margin-top:var(--space-2)}
+.btn-sm{font-size:12px;padding:5px 11px;border-radius:999px}
+
+.field>label{display:block;font-size:12px;margin-bottom:5px;color:color-mix(in srgb,var(--color-text) 70%,transparent)}
+.input{width:100%;min-height:36px;padding:6px 10px;font:inherit;font-size:14px;color:var(--color-text);
+  caret-color:var(--color-accent);background:var(--color-surface);
+  border:1px solid var(--color-divider);border-radius:var(--radius-md)}
+.input:focus-visible{border-color:var(--color-accent);outline-offset:0}
+textarea.input{min-height:90px;resize:vertical}
+
+.card{background:var(--color-neutral-100);border:1px solid var(--color-neutral-300);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:var(--space-6)}
+.tag{display:inline-flex;align-items:center;font-size:11px;padding:3px 10px;border-radius:999px;font-weight:600}
+.tag-accent{background:var(--color-accent-100);color:var(--color-accent-800)}
+.tag-ok{background:var(--color-accent-2-100);color:var(--color-accent-2-800)}
+.tag-neutral{background:var(--color-neutral-200);color:var(--color-neutral-800)}
+.tag-bad{background:var(--color-danger-100);color:var(--color-danger)}
+
+.wrap{max-width:1120px;margin:0 auto;padding:32px 20px 96px;display:flex;flex-direction:column;gap:30px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+.top h1{font-size:60px;line-height:.95;margin-top:8px}
+.pill{display:flex;align-items:center;gap:10px;padding:8px 12px 8px 14px;background:var(--color-neutral-100);
+  border:1px solid var(--color-neutral-300);border-radius:999px}
+.pill .dot{width:9px;height:9px;border-radius:999px;background:var(--color-accent);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.pill .dot{animation:none}}
+
+.pass{display:flex;flex-wrap:wrap;background:var(--color-neutral-100);border:1px solid var(--color-neutral-300);
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-md);overflow:hidden}
+.pass .main{flex:1 1 560px;min-width:300px;padding:28px 30px;display:flex;flex-direction:column;gap:22px}
+.pass .route{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.pass .code{font-family:var(--font-heading);font-size:52px;line-height:1}
+.pass .city{font:500 13px/1.3 var(--font-body);color:var(--color-neutral-600)}
+.pass .line{flex:1 1 150px;min-width:110px;display:flex;flex-direction:column;gap:6px}
+.pass .dash{height:2px;position:relative;
+  background:repeating-linear-gradient(90deg,var(--color-neutral-400) 0 6px,transparent 6px 12px)}
+.pass .plane{position:absolute;top:-9px;transform:translateX(-50%);font-size:16px;line-height:1;color:var(--color-accent-700)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:18px 12px}
+.facts .v{font:600 15px/1.3 var(--font-body);margin-top:5px}
+.stub{flex:0 0 220px;position:relative;padding:28px 24px;background:var(--color-accent-100);
+  border-left:2px dashed var(--color-neutral-400);display:flex;flex-direction:column;
+  justify-content:space-between;gap:20px}
+.stub .notch{position:absolute;left:-11px;width:22px;height:22px;border-radius:999px;background:var(--color-bg)}
+.stub .notch.t{top:-11px} .stub .notch.b{bottom:-11px}
+.stub .seat{font-family:var(--font-heading);font-size:34px;line-height:1.05;margin-top:4px}
+.bars{display:flex;align-items:flex-end;gap:2px;height:54px}
+.bars span{height:54px;background:var(--color-neutral-900)}
+
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--color-neutral-300);background:var(--color-neutral-100);border-radius:999px;
+  padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--color-neutral-700)}
+.tabs button[aria-selected="true"]{background:var(--color-accent);border-color:var(--color-accent);color:var(--color-bg)}
+h2.sect{font-size:30px;margin-bottom:var(--space-3)}
+.pane{display:flex;flex-direction:column;gap:26px}
+
+.leg{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;padding:14px 0;
+  border-bottom:1px solid var(--color-divider)}
+.leg:last-child{border-bottom:0}
+.leg .sector{font-family:var(--font-heading);font-size:22px;min-width:150px}
+.leg .sector .arw{color:var(--color-neutral-500);font-size:16px;padding:0 4px}
+.leg .bits{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--color-neutral-700);flex:1 1 240px}
+.leg .bits b{font-weight:600;color:var(--color-text)}
+#map{height:340px;border-radius:var(--radius-md);border:1px solid var(--color-neutral-300);background:var(--color-neutral-200)}
+.leaflet-container{font-family:var(--font-body)}
+
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.check{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid var(--color-neutral-300);border-radius:var(--radius-md);padding:11px 14px;
+  background:var(--color-neutral-100);font-size:13px;font-weight:600}
+.check.passed{border-color:var(--color-accent-2-600);background:var(--color-accent-2-100)}
+.check.progress{border-color:var(--color-accent);background:var(--color-accent-100)}
+.check.failed{border-color:var(--color-danger);background:var(--color-danger-100)}
+.check.na{opacity:.5}
+body.admin .check{cursor:pointer}
+
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--color-divider)}
+th{font:600 10px/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)}
+td.num{text-align:right}
+tr:last-child td{border-bottom:0}
+[contenteditable="true"]{outline:1px dashed var(--color-accent);outline-offset:3px;border-radius:3px;min-width:22px;display:inline-block}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.big .n{font-family:var(--font-heading);font-size:44px;line-height:1}
+
+.days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:var(--space-4)}
+.days button{border:1px solid var(--color-neutral-300);background:transparent;border-radius:999px;
+  padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;color:var(--color-neutral-700)}
+.days button[aria-selected="true"]{background:var(--color-neutral-900);border-color:var(--color-neutral-900);color:var(--color-bg)}
+.sched{list-style:none;margin:0;padding:0}
+.sched li{display:grid;grid-template-columns:64px 1fr;gap:14px;padding:10px 0;
+  border-bottom:1px solid var(--color-divider);align-items:baseline}
+.sched li:last-child{border-bottom:0}
+.sched .tm{font:600 15px/1.2 var(--font-body);color:var(--color-accent-700)}
+.sched .who2{display:block;font-size:12px;color:var(--color-neutral-600)}
+.sched li.past{opacity:.42}
+.sched li.now{background:var(--color-accent-100);border-radius:var(--radius-sm);
+  padding-left:8px;padding-right:8px;margin:0 -8px}
+
+.task{background:var(--color-neutral-100);border:1px solid var(--color-neutral-300);
+  border-left:4px solid var(--color-neutral-400);border-radius:var(--radius-md);
+  padding:var(--space-3) var(--space-4);margin-bottom:10px}
+.task:last-child{margin-bottom:0}
+.task.critical{border-left-color:var(--color-danger)}
+.task.normal{border-left-color:var(--color-accent)}
+.task.done{opacity:.55}
+.task.done .ttl{text-decoration:line-through}
+.task .ttl{font:600 15px/1.3 var(--font-body)}
+.task .meta{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:6px;font-size:12px;color:var(--color-neutral-600)}
+.task .meta b{font-weight:600;color:var(--color-text)}
+.task .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:var(--space-4)}
+
+.rb{list-style:none;margin:0;padding:0}
+.rb li{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--color-divider)}
+.rb li:last-child{border-bottom:0}
+.rb .box{flex:none;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--color-neutral-400);
+  background:var(--color-neutral-100);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:transparent}
+.rb li.on .box{background:var(--color-accent-2);border-color:var(--color-accent-2);color:#fff}
+.rb li.on span{color:var(--color-neutral-600);text-decoration:line-through}
+
+.callout{background:var(--color-accent-100);border-left:4px solid var(--color-accent);
+  border-radius:var(--radius-sm);padding:12px 14px;font-size:14px;margin-bottom:12px}
+.callout.warn{background:var(--color-danger-100);border-left-color:var(--color-danger)}
+details{border:1px solid var(--color-neutral-300);border-radius:var(--radius-md);margin-bottom:8px;background:var(--color-neutral-100)}
+summary{padding:13px 16px;cursor:pointer;list-style:none;display:flex;gap:12px;align-items:baseline;font:600 15px/1.3 var(--font-body)}
+summary::-webkit-details-marker{display:none}
+summary .n{font-family:var(--font-heading);font-size:15px;color:var(--color-accent)}
+details .cnt{padding:0 16px 14px 44px}
+details ul{margin:0;padding-left:18px}
+details li{font-size:14px;margin-bottom:5px;color:var(--color-neutral-800)}
+
+.adminbox{border:1px dashed var(--color-accent);border-radius:var(--radius-md);padding:var(--space-4);
+  margin-top:var(--space-4);background:var(--color-accent-100)}
+.adminbox h4{font-size:17px;margin-bottom:var(--space-3)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stack{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+dialog{border:1px solid var(--color-neutral-300);border-radius:var(--radius-lg);padding:0;
+  width:390px;max-width:92vw;background:var(--color-neutral-100);box-shadow:var(--shadow-lg)}
+dialog::backdrop{background:color-mix(in srgb,#2e2b25 55%,transparent)}
+dialog .head{background:var(--color-accent-100);padding:22px 26px 20px;position:relative;
+  border-bottom:2px dashed var(--color-neutral-400)}
+dialog .head h3{font-size:40px;line-height:.95;margin-top:6px}
+dialog .notch{position:absolute;bottom:-11px;width:22px;height:22px;border-radius:999px;background:var(--color-neutral-100)}
+dialog .notch.l{left:-11px} dialog .notch.r{right:-11px}
+dialog .body{padding:20px 26px 24px}
+.err{color:var(--color-danger);font-size:13px;min-height:20px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--color-neutral-900);color:var(--color-neutral-200);
+  padding:10px 20px;font-size:12px;display:flex;align-items:center;gap:10px;z-index:1200}
+.bar b{color:var(--color-accent-100)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div><div class="kicker">Where is</div><h1>Celine</h1></div>
+    <div class="pill">
+      <span class="dot"></span>
+      <span style="font:600 13px/1 var(--font-body)" id="liveLabel">In transit</span>
+      <span class="muted" style="font-size:12px" id="whoLabel">· viewing</span>
+      <button class="btn btn-sm btn-secondary" id="authBtn">Crew sign-in</button>
+    </div>
+  </header>
+
+  <section class="pass">
+    <div class="main">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div style="display:flex;align-items:baseline;gap:12px">
+          <span style="font-family:var(--font-heading);font-size:22px">SILK WAY</span>
+          <span class="kicker">Cargo boarding pass</span>
+        </div>
+        <span class="tag tag-accent" id="shipStatus">In transit</span>
+      </div>
+      <div class="route">
+        <div><div class="code" id="origin">TLV</div><div class="city" id="originCity">Tel Aviv</div></div>
+        <div class="line">
+          <div class="dash"><span class="plane" id="plane" style="left:0%">✈</span></div>
+          <div style="text-align:center" class="kicker" id="legCount"></div>
+        </div>
+        <div><div class="code" id="dest">ZAG</div><div class="city" id="destCity">Zagreb</div></div>
+      </div>
+      <div class="facts">
+        <div><div class="kicker">Air waybill</div><div class="v">501-20737345</div></div>
+        <div><div class="kicker">Pieces</div><div class="v">3</div></div>
+        <div><div class="kicker">Current leg</div><div class="v" id="curFlight">—</div></div>
+        <div><div class="kicker">Next up</div><div class="v" id="nextUp">—</div></div>
+      </div>
+    </div>
+    <div class="stub">
+      <span class="notch t"></span><span class="notch b"></span>
+      <div>
+        <div class="kicker" style="color:var(--color-accent-700)">Seat</div>
+        <div class="seat">3 PCS</div>
+        <div style="font:500 12px/1.4 var(--font-body);color:var(--color-accent-800);margin-top:8px">
+          Celine / FS car + spares</div>
+      </div>
+      <div class="bars" id="bars"></div>
+    </div>
+  </section>
+
+  <div class="tabs" role="tablist" id="tabs">
+    <button data-t="track" aria-selected="true">Tracker</button>
+    <button data-t="comp" aria-selected="false">Competition</button>
+    <button data-t="today" aria-selected="false">Schedule</button>
+    <button data-t="tasks" aria-selected="false">Tasks</button>
+    <button data-t="meet" aria-selected="false">End of day</button>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="pane" id="pane-track">
+    <section>
+      <h2 class="sect">Location</h2>
+      <div class="card">
+        <div id="map"></div>
+        <p class="muted" style="font-size:12px;margin:10px 0 0">
+          Planned routing, not a live ADS-B feed.
+          <a href="https://www.flightradar24.com/data/airports/zag/arrivals" target="_blank" rel="noopener">ZAG arrivals</a> ·
+          <a href="https://www.silkwaywest.com/e-services/shipment-tracking/" target="_blank" rel="noopener">Track the AWB</a>
+        </p>
+      </div>
+    </section>
+    <section>
+      <h2 class="sect">Routing, leg by leg</h2>
+      <div class="card"><div id="legs"></div></div>
+    </section>
+  </div>
+
+  <!-- COMPETITION -->
+  <div class="pane hide" id="pane-comp">
+    <div class="tabs" id="evtabs1"></div>
+    <section><h2 class="sect">Scrutineering</h2>
+      <div class="card"><div class="checks" id="checksGrid"></div>
+        <p class="muted" style="font-size:12px;margin:14px 0 0" id="checkHint"></p></div></section>
+    <section><h2 class="sect">Dynamic events</h2>
+      <div class="card"><table><thead><tr><th>Event</th><th>Result</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
+      <tbody id="dyn"></tbody></table></div></section>
+    <section><h2 class="sect">Static events</h2>
+      <div class="card"><table><thead><tr><th>Event</th><th>Note</th><th class="num">Points</th><th class="num">Rank</th></tr></thead>
+      <tbody id="stat"></tbody></table></div></section>
+    <section><h2 class="sect">Overall</h2>
+      <div class="card"><div class="big">
+        <div><div class="kicker">Rank</div><div class="n" id="ovRank">—</div></div>
+        <div><div class="kicker">Points</div><div class="n" id="ovPts">—</div></div>
+      </div></div></section>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="pane hide" id="pane-today">
+    <div class="tabs" id="evtabs2"></div>
+    <section>
+      <h2 class="sect">Tomorrow's call</h2>
+      <div class="card">
+        <div class="facts">
+          <div><div class="kicker">Wake-up</div><div class="v" id="kWake">—</div></div>
+          <div><div class="kicker">At the pit</div><div class="v" id="kPit">—</div></div>
+          <div><div class="kicker">First event</div><div class="v" id="kFirst">—</div></div>
+          <div><div class="kicker">Drivers</div><div class="v" id="kDrivers">—</div></div>
+          <div style="grid-column:1/-1"><div class="kicker">Radios (4)</div><div class="v" id="kRadios">—</div></div>
+        </div>
+        <div class="adminbox hide">
+          <h4>Edit the call</h4>
+          <div class="two">
+            <div class="field"><label for="eWake">Wake-up</label><input class="input" id="eWake"></div>
+            <div class="field"><label for="ePit">At the pit</label><input class="input" id="ePit"></div>
+            <div class="field"><label for="eFirst">First event</label><input class="input" id="eFirst"></div>
+            <div class="field"><label for="eDrivers">Drivers</label><input class="input" id="eDrivers"></div>
+          </div>
+          <div class="field" style="margin-top:10px"><label for="eRadios">Radio holders</label><input class="input" id="eRadios"></div>
+          <button class="btn btn-primary btn-sm" id="saveCall">Save</button>
+        </div>
+      </div>
+    </section>
+    <section>
+      <h2 class="sect">Official timetable</h2>
+      <div class="card">
+        <div class="days" id="days"></div>
+        <ul class="sched" id="schedList"></ul>
+        <p class="muted" style="font-size:12px;margin:14px 0 0" id="schedNote"></p>
+        <div class="adminbox hide">
+          <h4>Add your own item</h4>
+          <div class="two">
+            <div class="field"><label for="sDate">Date</label><input class="input" id="sDate" type="date"></div>
+            <div class="field"><label for="sTime">Time</label><input class="input" id="sTime" placeholder="07:30"></div>
+          </div>
+          <div class="field" style="margin-top:10px"><label for="sWhat">What</label>
+            <input class="input" id="sWhat" placeholder="Our slot: cost event"></div>
+          <div class="field"><label for="sWho">Who</label><input class="input" id="sWho" placeholder="Whole team / drivers"></div>
+          <div class="stack">
+            <button class="btn btn-primary btn-sm" id="addSched">Add item</button>
+            <button class="btn btn-secondary btn-sm" id="reseed">Reload official timetable</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- TASKS -->
+  <div class="pane hide" id="pane-tasks">
+    <section>
+      <h2 class="sect">Daily action tracker</h2>
+      <div class="card">
+        <div class="filters">
+          <select class="input" id="fOwner"></select>
+          <select class="input" id="fStatus"><option value="">Any status</option>
+            <option value="open">Open</option><option value="doing">In progress</option><option value="done">Done</option></select>
+          <select class="input" id="fPriority"><option value="">Any priority</option>
+            <option value="critical">Critical</option><option value="normal">Normal</option><option value="low">Low</option></select>
+          <select class="input" id="fEvent"><option value="">Both events</option>
+            <option value="FSAA">FSAA</option><option value="FSF">FSF</option></select>
+        </div>
+        <div id="taskList"></div>
+        <div class="adminbox hide">
+          <h4>New task</h4>
+          <div class="field"><label for="tTitle">Task / issue</label>
+            <input class="input" id="tTitle" placeholder="Re-torque uprights, replace LH damper"></div>
+          <div class="two">
+            <div class="field"><label for="tOwner">Owner</label><select class="input" id="tOwner"></select></div>
+            <div class="field"><label for="tDeadline">Deadline</label><input class="input" id="tDeadline" placeholder="before scrutineering"></div>
+            <div class="field"><label for="tPriority">Priority</label>
+              <select class="input" id="tPriority"><option value="critical">Critical</option>
+                <option value="normal" selected>Normal</option><option value="low">Low</option></select></div>
+            <div class="field"><label for="tEvent">Event</label>
+              <select class="input" id="tEvent"><option value="FSAA">FSAA</option><option value="FSF">FSF</option></select></div>
+          </div>
+          <div class="stack">
+            <button class="btn btn-primary btn-sm" id="addTask">Add task</button>
+            <button class="btn btn-secondary btn-sm" id="clearDone">Clear finished</button>
+            <button class="btn btn-secondary btn-sm" id="editMembers">Edit crew list</button>
+          </div>
+          <div class="hide" id="memberBox" style="margin-top:12px">
+            <div class="field"><label for="mList">One name per line</label><textarea class="input" id="mList" rows="8"></textarea></div>
+            <button class="btn btn-primary btn-sm" id="saveMembers">Save crew</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- END OF DAY -->
+  <div class="pane hide" id="pane-meet">
+    <section>
+      <h2 class="sect">Read-back before dismissal</h2>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap">
+          <span class="kicker" id="rbDate">—</span>
+          <button class="btn btn-sm btn-secondary" id="rbReset">Reset for tonight</button>
+        </div>
+        <ul class="rb" id="rbList"></ul>
+        <p class="muted" style="font-size:12px;margin:12px 0 0">
+          Anyone signed in can tick these. They clear themselves each new day.</p>
+      </div>
+    </section>
+    <section>
+      <h2 class="sect">Meeting agenda</h2>
+      <div class="card">
+        <p style="margin:0 0 var(--space-3)"><strong>Mandatory competition-day debrief.</strong>
+          End every competition day with one clear team picture: what happened, what condition the car is in,
+          what must be done, who owns each task, and exactly what happens tomorrow.</p>
+        <div class="callout">Attendance is mandatory for the whole team unless someone is actively handling an
+          urgent task that cannot stop. Target duration: 15–20 minutes. Detailed sub-team discussions happen afterward.</div>
+        <div id="agenda"></div>
+        <div class="callout warn" style="margin-top:14px">Work hours are for work and sleep hours are for sleep.
+          If tomorrow is demanding, nobody should stay up late partying and arrive tired when the team needs them.</div>
+        <div class="callout">End the meeting only when the team knows what is happening next. The goal is not to
+          discuss everything; the goal is to leave with clear owners, clear priorities, and a clear next-day plan.</div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<dialog id="login">
+  <div class="head">
+    <div class="kicker" style="color:var(--color-accent-700)">Pit crew access</div>
+    <h3>Celine</h3>
+    <span class="notch l"></span><span class="notch r"></span>
+  </div>
+  <div class="body">
+    <div class="field"><label for="user">Name</label>
+      <input class="input" id="user" list="names" autocomplete="off" placeholder="your name"></div>
+    <datalist id="names"></datalist>
+    <div class="field"><label for="pw">Password</label>
+      <input class="input" id="pw" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+    <div class="err" id="err"></div>
+    <button class="btn btn-primary btn-block" id="signin">Sign in</button>
+    <button class="btn btn-secondary btn-block" id="cancel">Keep viewing</button>
+  </div>
+</dialog>
+
+<div class="bar"><span id="sync">connecting…</span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+   1. CONFIG
+   ============================================================ */
+const CONFIG = {
+  supabaseUrl: "",
+  supabaseAnonKey: "",
+  table: "celine_state",
+  rowId: 1,
+  crewPassword: "FTmember",
+  adminUser: "FTadmin",
+  adminPassword: "FTadmin"
+};
+
+const MEMBERS = Array.from({length:30}, (_,i)=>`Member ${String(i+1).padStart(2,"0")}`);
+
+const AIRPORTS = {
+  TLV:{lat:32.011,lon:34.887,city:"Tel Aviv"},
+  GYD:{lat:40.467,lon:50.047,city:"Baku"},
+  VIE:{lat:48.110,lon:16.570,city:"Vienna"},
+  ZAG:{lat:45.743,lon:16.069,city:"Zagreb"},
+  PDK:{lat:45.727,lon:16.020,city:"Paddock, Velika Gorica"}
+};
+
+const EVENTS = {
+  FSAA:{label:"FSAA", full:"Formula Student Alpe Adria",
+    days:["2026-08-16","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-22","2026-08-23","2026-08-24"],
+    note:"From the FSAA 2026 preliminary timetable."},
+  FSF:{label:"FSF", full:"Formula Student France",
+    days:["2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-29"],
+    note:"Read off the FSF 2026 timetable grid — check times against the official PDF."}
+};
+
+/* ---------- official timetables: [date, time, what] ---------- */
+const SEED = [
+  /* FSAA — Day -1 */
+  ["2026-08-16","13:00","Moving into the camp"],
+  /* Day 0 */
+  ["2026-08-17","09:00","Event site open · until 21:00"],
+  ["2026-08-17","09:00","Moving into the camp · until 21:00"],
+  ["2026-08-17","09:00","Team registrations · until 19:00"],
+  ["2026-08-17","09:00","Pits open · until 19:00"],
+  ["2026-08-17","09:00","Early scrutineering · until 20:30"],
+  ["2026-08-17","12:30","Lunch break · until 13:30"],
+  /* Day 1 */
+  ["2026-08-18","07:30","Event site open · until 21:00"],
+  ["2026-08-18","08:30","Team registrations · until 18:00"],
+  ["2026-08-18","08:30","Mechanical scrutineering · until 18:00"],
+  ["2026-08-18","08:30","Electrical scrutineering · until 18:00"],
+  ["2026-08-18","08:30","Accumulator scrutineering · until 18:00"],
+  ["2026-08-18","08:30","Tilt test · until 18:00"],
+  ["2026-08-18","09:00","Moving into the camp · until 18:00"],
+  ["2026-08-18","09:00","IPG simulation challenge · 09:00–12:00, 13:00–16:00, 17:00–18:30"],
+  ["2026-08-18","12:30","Lunch break · until 13:30"],
+  ["2026-08-18","15:00","Brake test · until 18:00"],
+  ["2026-08-18","15:00","Noise test · until 18:00"],
+  ["2026-08-18","15:00","Rain test · until 18:00"],
+  ["2026-08-18","15:00","Pre-inspection (driver egress) · until 18:00"],
+  ["2026-08-18","18:00","Press briefing"],
+  ["2026-08-18","19:00","Opening ceremony"],
+  /* Day 2 */
+  ["2026-08-19","07:30","Event site open · until 21:00"],
+  ["2026-08-19","08:00","Team leaders, drivers & media briefing · until 08:30"],
+  ["2026-08-19","08:00","Pre-inspection (driver egress) · until 20:30"],
+  ["2026-08-19","08:00","Mechanical scrutineering · until 20:30"],
+  ["2026-08-19","08:00","Electrical scrutineering · until 20:30"],
+  ["2026-08-19","08:00","Accumulator scrutineering · until 20:30"],
+  ["2026-08-19","08:00","Tilt test · until 20:30"],
+  ["2026-08-19","08:00","Noise test · until 20:00"],
+  ["2026-08-19","08:00","Rain test · until 20:00"],
+  ["2026-08-19","08:30","Brake test · until 19:00"],
+  ["2026-08-19","09:00","Rimac innovation challenge · until 19:00"],
+  ["2026-08-19","09:00","IPG simulation challenge · 09:00–12:00, 13:00–16:00, 17:00–18:30"],
+  ["2026-08-19","10:00","Practice area · until 19:00"],
+  ["2026-08-19","12:30","Lunch break · until 13:30"],
+  /* Day 3 */
+  ["2026-08-20","07:30","Event site open · until 21:00"],
+  ["2026-08-20","08:00","Team leaders, drivers & media briefing · until 08:30"],
+  ["2026-08-20","08:00","Mechanical scrutineering · until 20:30"],
+  ["2026-08-20","08:00","Electrical scrutineering · until 20:30"],
+  ["2026-08-20","08:00","Accumulator scrutineering · until 20:30"],
+  ["2026-08-20","08:00","Tilt test · until 20:30"],
+  ["2026-08-20","08:00","Noise test · until 20:00"],
+  ["2026-08-20","08:00","Rain test · until 20:00"],
+  ["2026-08-20","08:30","Brake test · until 19:00"],
+  ["2026-08-20","08:30","Practice area · until 19:00"],
+  ["2026-08-20","09:00","IPG simulation challenge · 09:00–12:00, 13:00–16:00, 17:00–18:30"],
+  ["2026-08-20","12:30","Lunch break · until 13:30"],
+  ["2026-08-20","14:00","Bugatti Rimac company introduction"],
+  ["2026-08-20","15:00","Acceleration · until 19:00"],
+  ["2026-08-20","15:00","Skid pad · until 19:00"],
+  ["2026-08-20","15:00","Concept class statics · until 19:00"],
+  ["2026-08-20","15:00","Spectator area opens"],
+  ["2026-08-20","16:00","Rimac Technology company introduction"],
+  ["2026-08-20","18:30","DV scrutineering · until 20:30"],
+  /* Day 4 */
+  ["2026-08-21","07:30","Event site open · until 21:00"],
+  ["2026-08-21","08:00","Team leaders, drivers & media briefing · until 08:30"],
+  ["2026-08-21","08:00","Mechanical scrutineering · until 13:00"],
+  ["2026-08-21","08:00","Electrical scrutineering · until 13:00"],
+  ["2026-08-21","08:00","Accumulator scrutineering · until 13:00"],
+  ["2026-08-21","08:00","Tilt test · until 13:00"],
+  ["2026-08-21","08:00","Noise test · until 17:00"],
+  ["2026-08-21","08:00","Rain test · until 17:00"],
+  ["2026-08-21","08:00","Spectator area open · until 17:00"],
+  ["2026-08-21","08:30","Brake test · until 17:00"],
+  ["2026-08-21","08:30","Acceleration · until 15:00"],
+  ["2026-08-21","08:30","Skid pad · until 15:00"],
+  ["2026-08-21","09:00","Business plan presentation · until 17:30"],
+  ["2026-08-21","09:00","Cost and manufacturing · until 17:30"],
+  ["2026-08-21","09:00","Engineering design · until 17:30"],
+  ["2026-08-21","09:00","IPG simulation challenge · 09:00–12:00, 13:00–16:00, 17:00–18:30"],
+  ["2026-08-21","12:30","Lunch break · until 13:30"],
+  ["2026-08-21","15:00","DV acceleration · until 17:00"],
+  ["2026-08-21","15:00","DV skid pad · until 17:00"],
+  ["2026-08-21","18:00","Panoramic photograph (all teams)"],
+  ["2026-08-21","19:00","Formation lap"],
+  /* Day 5 */
+  ["2026-08-22","07:30","Event site open · until 20:00"],
+  ["2026-08-22","07:30","Team leaders, drivers & media briefing · until 08:00"],
+  ["2026-08-22","08:00","Track walk · until 08:30"],
+  ["2026-08-22","08:00","Spectator area open · until 19:00"],
+  ["2026-08-22","08:30","Feedback business plan presentation · until 12:30"],
+  ["2026-08-22","08:30","AutoX · until 19:00"],
+  ["2026-08-22","09:00","Engineering design · until 11:00"],
+  ["2026-08-22","09:00","Cost and manufacturing · until 11:00"],
+  ["2026-08-22","09:00","IPG simulation open sessions · 09:00–12:00, 13:00–16:00"],
+  ["2026-08-22","11:00","Engineering design finals — EV · until 12:30"],
+  ["2026-08-22","12:30","Lunch break · until 13:30"],
+  ["2026-08-22","13:30","Engineering design finals — CV · until 16:00"],
+  ["2026-08-22","13:30","Feedback engineering design · until 18:00"],
+  ["2026-08-22","13:30","Feedback cost and manufacturing · until 18:00"],
+  ["2026-08-22","16:30","Business plan presentation finals · until 18:00"],
+  ["2026-08-22","21:00","Award ceremony #1 (campsite) · until 24:00"],
+  /* Day 6 */
+  ["2026-08-23","07:30","Event site open · until 19:00"],
+  ["2026-08-23","07:30","Team leaders, drivers & media briefing · until 08:00"],
+  ["2026-08-23","08:00","Track walk · until 08:30"],
+  ["2026-08-23","08:30","Endurance event · until 19:00"],
+  ["2026-08-23","09:15","Engine running area · until 19:00"],
+  ["2026-08-23","10:00","Spectator area open · until 19:00"],
+  ["2026-08-23","12:30","Lunch break · until 13:30"],
+  ["2026-08-23","20:00","Moving out of the pits and camp (per request) · until 20:00"],
+  ["2026-08-23","21:00","Award ceremony #2 (campsite) · until 24:00"],
+  /* Day 7 */
+  ["2026-08-24","10:00","FSAA: moving out of the pits · until 13:00"],
+  ["2026-08-24","16:00","FSAA: moving out of the camp · by 16:00"],
+
+  /* FSF — Monday */
+  ["2026-08-24","07:15","Competition site opens"],
+  ["2026-08-24","08:00","Scrutineering — accumulator + mechanical · until 12:00"],
+  ["2026-08-24","13:30","Scrutineering — accumulator + mechanical · until 19:00"],
+  ["2026-08-24","20:15","Opening ceremony"],
+  ["2026-08-24","22:45","Competition site closes"],
+  /* Tuesday */
+  ["2026-08-25","07:15","Competition site opens"],
+  ["2026-08-25","08:30","Business plan presentation · until 12:15"],
+  ["2026-08-25","08:30","Engineering design · until 12:15"],
+  ["2026-08-25","08:30","Cost · until 12:15"],
+  ["2026-08-25","08:45","Partners workshops · until 12:15"],
+  ["2026-08-25","09:00","Scrutineering — acc + elec + mech · until 12:00"],
+  ["2026-08-25","14:00","Business plan, design and cost · until 19:00"],
+  ["2026-08-25","15:00","Partners workshops · until 17:30"],
+  ["2026-08-25","15:45","Scrutineering — acc + elec + mech · until 19:00"],
+  ["2026-08-25","22:45","Competition site closes"],
+  /* Wednesday */
+  ["2026-08-26","07:15","Competition site opens"],
+  ["2026-08-26","08:00","Engineering design · until 13:00"],
+  ["2026-08-26","08:00","Cost · until 13:00"],
+  ["2026-08-26","08:15","Brake & rain test · until 12:00"],
+  ["2026-08-26","08:45","Partners workshops · until 12:15"],
+  ["2026-08-26","09:00","Scrutineering — acc + elec + mech · until 12:00"],
+  ["2026-08-26","09:00","Business plan presentation · until 11:30"],
+  ["2026-08-26","10:00","AutoX track walk · until 11:45"],
+  ["2026-08-26","13:30","Brake & rain test · until 18:30"],
+  ["2026-08-26","14:00","Business plan presentation · until 15:00"],
+  ["2026-08-26","14:00","Practice · until 18:30"],
+  ["2026-08-26","14:00","Partners workshops · until 17:15"],
+  ["2026-08-26","15:00","Engineering design · until 20:00"],
+  ["2026-08-26","15:00","Cost · until 20:00"],
+  ["2026-08-26","15:00","Scrutineering — acc + elec + mech · until 19:00"],
+  ["2026-08-26","20:15","Pilots & DC briefing 1"],
+  ["2026-08-26","21:00","Business plan finals"],
+  /* Thursday */
+  ["2026-08-27","07:15","Competition site opens"],
+  ["2026-08-27","07:45","3C/OC design · until 12:00"],
+  ["2026-08-27","07:45","3C/OC cost · until 12:00"],
+  ["2026-08-27","07:45","Skidpad · until 11:00"],
+  ["2026-08-27","08:15","Brake & rain test · until 12:00"],
+  ["2026-08-27","08:45","Practice · until 12:00"],
+  ["2026-08-27","09:00","Scrutineering (on demand only) · until 11:00"],
+  ["2026-08-27","10:00","Press conference, breakfast talks & round table (FR)"],
+  ["2026-08-27","10:00","DV acceleration · until 12:00"],
+  ["2026-08-27","12:15","Alumni acceleration"],
+  ["2026-08-27","12:15","Network lunch (sponsors & pros)"],
+  ["2026-08-27","13:15","Brake & rain test · until 18:00"],
+  ["2026-08-27","14:00","Cost & manufacturing finals"],
+  ["2026-08-27","15:00","Scrutineering (on demand only) · until 17:00"],
+  ["2026-08-27","15:00","Practice · until 17:00"],
+  ["2026-08-27","15:00","Acceleration · until 17:00"],
+  ["2026-08-27","15:00","DV skidpad · until 17:00"],
+  ["2026-08-27","19:00","Alumni skidpad"],
+  ["2026-08-27","19:45","Engineering design finals"],
+  ["2026-08-27","20:45","DC AutoX track walk"],
+  ["2026-08-27","21:30","Pilots & DC briefing 2"],
+  /* Friday */
+  ["2026-08-28","07:15","Competition site opens"],
+  ["2026-08-28","07:45","DV autocross · until 11:00"],
+  ["2026-08-28","08:15","Brake & rain test · until 12:00"],
+  ["2026-08-28","08:45","Practice · until 12:00"],
+  ["2026-08-28","08:45","Autocross · until 12:30"],
+  ["2026-08-28","09:00","Scrutineering (on demand only) · until 11:00"],
+  ["2026-08-28","13:30","DV trackdrive · until 17:15"],
+  ["2026-08-28","14:00","Practice · until 17:00"],
+  ["2026-08-28","15:00","Alumni endurance · until 17:00"],
+  ["2026-08-28","17:30","Event photo"],
+  ["2026-08-28","19:00","Endurance track walk"],
+  ["2026-08-28","20:00","Award ceremony part 1"],
+  ["2026-08-28","21:00","Pilots briefing 3 — endurance"],
+  /* Saturday */
+  ["2026-08-29","07:15","Competition site opens"],
+  ["2026-08-29","08:00","Endurance · until 12:45"],
+  ["2026-08-29","14:15","Endurance · until 17:15"],
+  ["2026-08-29","17:30","Alumni drift event"],
+  ["2026-08-29","19:00","Award ceremony part 2"],
+  ["2026-08-29","21:45","Competition site closes"]
+];
+function seedSchedule(){
+  return SEED.map((r,i)=>({id:"seed"+i, date:r[0], t:r[1], d:r[2], who:"", official:true}));
+}
+
+const SCRUT = ["Document check","Mechanical","Electrical","Accumulator","Tilt test","Brake test","Noise test","Rain test"];
+const DYN = ["Acceleration","Skidpad","Autocross","Endurance","Efficiency"];
+const STAT = ["Business Plan","Cost & Manufacturing","Engineering Design"];
+function blankComp(){
+  return {
+    scrutineering: SCRUT.map(n=>({n, s:n==="Noise test" ? "na" : "pending"})),
+    dynamic: DYN.map(n=>({n, r:"", p:"", k:""})),
+    static: STAT.map(n=>({n, r:"", p:"", k:""})),
+    overall:{rank:"", points:""}
+  };
+}
+
+const READBACK = [
+  "Every critical task has an owner",
+  "Every owner knows their deadline",
+  "Everyone knows tomorrow's wake-up time",
+  "Everyone knows when they must be at the pit",
+  "The drivers know their schedule",
+  "All four radios are assigned and charging",
+  "Nothing is blocking the car or the team without a plan"
+];
+
+const DEFAULTS = {
+  shipStatus: "In transit",
+  legs: [
+    {from:"TLV", to:"GYD", mode:"air", flight:"7L217", ac:"B747-400F", block:"3h 10m", dep:"", arr:"", state:"done"},
+    {from:"GYD", to:"VIE", mode:"air", flight:"7L280", ac:"B747-400F", block:"4h 15m", dep:"", arr:"", state:"now"},
+    {from:"VIE", to:"PDK", via:["ZAG"], mode:"road", flight:"Road feeder + team van",
+     ac:"Truck via Zagreb", block:"≈5h · 410 km", dep:"", arr:"", state:"wait"}
+  ],
+  comps: {FSAA: blankComp(), FSF: blankComp()},
+  members: MEMBERS,
+  tasks: [],
+  schedule: seedSchedule(),
+  call: {FSAA:{wake:"",pit:"",first:"",drivers:"",radios:""}, FSF:{wake:"",pit:"",first:"",drivers:"",radios:""}},
+  readback: {date:"", checks:READBACK.map(()=>false)}
+};
+
+const AGENDA = [
+  ["What happened today",["Major events completed today.","Scrutineering / technical inspection results.","Static or dynamic event results.","Important problems, delays, or incidents.","Important information received from organizers or officials."]],
+  ["Car status",["Mechanical status.","Electrical status.","Accumulator / high-voltage status.","Aerodynamics / bodywork status.","Controls / data / electronics status, when relevant.","Any damage, reliability concern, leak, fault, warning, or part that needs inspection.","Is the car ready for the next event? If not, what is blocking it?"]],
+  ["Open technical / scrutineering items",["List every issue still open from inspection or from today's running.","Separate critical blockers from lower-priority improvements.","Make sure each issue has one clear owner."]],
+  ["Tasks for tonight and tomorrow",["Create a short list of work that must be completed.","Assign one responsible person to every task.","Set a deadline or \"before event\" time for every critical task.","Confirm which people are staying to work and which people must stop and sleep for the next day.","Do not keep the entire team awake for work that only requires a few people."]],
+  ["Tomorrow's schedule",["Wake-up time.","When everyone needs to be at the pit.","First event / scrutineering / briefing time.","Driver times.","Any deadlines for forms, queues, charging, repairs, or equipment preparation.","Who needs to leave early for an event or organizer meeting."]],
+  ["Drivers",["Confirm who is driving tomorrow and in which event.","Confirm briefing/check-in time and where the driver must be.","Check that all driver equipment is ready.","Make sure drivers have time to eat, hydrate, and sleep properly."]],
+  ["Logistics, food and camp",["Food / grocery plan for the next day.","Any shared-food cash issues or purchases that need approval.","Reminder: eating is outside the pit.","Rental vehicle needs, drivers, fuel, keys, parking, or transport movements.","Any camp issue that needs to be fixed before sleeping.","Reminder: alcohol is allowed ONLY in the campsite and must not interfere with the next day's work, driving, or safety."]],
+  ["Communication check",["Confirm any important schedule or location changes.","Confirm who the four walkie-talkie holders are for the next day.","Make sure all four radios are charging overnight and will be ready in the morning.","If a radio is damaged, missing, or not charging, solve it before the next competition day starts."]],
+  ["Team / organization issues",["Missing people or poor communication.","Tasks that were not completed or had no owner.","Tools or equipment not returned.","Pit or camp cleanliness problems.","Any behavior or organization problem that should be corrected before it becomes bigger.","Keep this section factual and short. Solve detailed personal discussions separately after the meeting."]],
+  ["Safety and emergency check",["Raise any safety issue discovered during the day.","Check whether anything needs to be isolated, repaired, charged, cooled, secured, or monitored overnight.","Make sure nobody starts high-risk work when too tired to do it safely.","Emergency contact: Amjad. Everyone should have his phone number saved."]]
+];
+
+/* ============================================================
+   2. STATE
+   ============================================================ */
+let D = clone(DEFAULTS);
+let me = null, isAdmin = false;
+let tab = "track", ev = "FSAA", day = null;
+let sb = null, mode = "local", map = null;
+const KEY = "celine:v3";
+
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function today(){ const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function clock(){ return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+function setSync(t, live){ $("sync").innerHTML = live ? `<b>● live</b> · ${t}` : t; }
+function merge(base, over){
+  for(const k in over){
+    if(over[k] && typeof over[k]==="object" && !Array.isArray(over[k]) && base[k]) merge(base[k], over[k]);
+    else base[k] = over[k];
+  }
+  return base;
+}
+
+async function initBackend(){
+  if(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey && window.supabase){
+    sb = window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+    mode = "cloud";
+    await pull();
+    sb.channel("celine")
+      .on("postgres_changes",{event:"*",schema:"public",table:CONFIG.table,filter:`id=eq.${CONFIG.rowId}`},
+        p=>{ if(p.new && p.new.data && Object.keys(p.new.data).length){
+              D = merge(clone(DEFAULTS), p.new.data); render(); setSync("updated "+clock(), true); } })
+      .subscribe();
+    setInterval(pull, 30000);
+  }else{
+    try{ const r = await window.storage.get(KEY);
+      if(r && r.value) D = merge(clone(DEFAULTS), JSON.parse(r.value)); }catch(e){}
+    setSync("local only — add Supabase keys to share");
+  }
+}
+async function pull(){
+  try{
+    const {data,error} = await sb.from(CONFIG.table).select("data").eq("id",CONFIG.rowId).single();
+    if(error) throw error;
+    if(data && data.data && Object.keys(data.data).length){ D = merge(clone(DEFAULTS), data.data); render(); }
+    setSync("updated "+clock(), true);
+  }catch(e){ setSync("offline — showing last data", true); }
+}
+async function save(){
+  if(mode === "cloud"){
+    try{
+      const {error} = await sb.from(CONFIG.table)
+        .update({data:D, updated_at:new Date().toISOString()}).eq("id",CONFIG.rowId);
+      if(error) throw error;
+      setSync("saved "+clock(), true);
+    }catch(e){ setSync("save failed", true); }
+  }else{
+    try{ await window.storage.set(KEY, JSON.stringify(D)); setSync("saved "+clock()); }
+    catch(e){ setSync("this session only"); }
+  }
+}
+
+/* ============================================================
+   3. LOGIN
+   ============================================================ */
+const dlg = $("login");
+$("authBtn").onclick = ()=>{
+  if(me){ me=null; isAdmin=false; document.body.classList.remove("admin");
+    $("authBtn").textContent = "Crew sign-in"; $("whoLabel").textContent = "· viewing";
+    document.querySelectorAll(".adminbox").forEach(b=>b.classList.add("hide")); render(); return; }
+  $("names").innerHTML = D.members.map(n=>`<option value="${esc(n)}">`).join("");
+  dlg.showModal();
+};
+$("cancel").onclick = ()=>dlg.close();
+$("signin").onclick = doLogin;
+$("pw").onkeydown = e=>{ if(e.key==="Enter") doLogin(); };
+$("user").onkeydown = e=>{ if(e.key==="Enter") $("pw").focus(); };
+
+function doLogin(){
+  const u = $("user").value.trim(), p = $("pw").value, err = $("err");
+  if(u.toLowerCase() === CONFIG.adminUser.toLowerCase()){
+    if(p !== CONFIG.adminPassword){ err.textContent = "Wrong admin password."; return; }
+    me = "Admin"; isAdmin = true;
+  }else{
+    const match = D.members.find(n=>n.toLowerCase() === u.toLowerCase());
+    if(!match){ err.textContent = "Name not on the crew list."; return; }
+    if(p !== CONFIG.crewPassword){ err.textContent = "Wrong password."; return; }
+    me = match; isAdmin = false;
+  }
+  $("pw").value = ""; err.textContent = ""; dlg.close();
+  document.body.classList.toggle("admin", isAdmin);
+  $("authBtn").textContent = "Sign out";
+  $("whoLabel").textContent = "· " + me + (isAdmin ? " (admin)" : "");
+  document.querySelectorAll(".adminbox").forEach(b=>b.classList.toggle("hide", !isAdmin));
+  if(!isAdmin) $("fOwner").value = me;
+  render();
+}
+
+/* ============================================================
+   4. TABS
+   ============================================================ */
+$("tabs").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  tab = b.dataset.t;
+  $("tabs").querySelectorAll("button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  ["track","comp","today","tasks","meet"].forEach(t=>$("pane-"+t).classList.toggle("hide", t!==tab));
+  window.scrollTo({top:0, behavior:"smooth"});
+  if(tab === "track" && map) setTimeout(()=>map.invalidateSize(), 60);
+});
+
+/* ============================================================
+   5. RENDER
+   ============================================================ */
+function render(){ renderPass(); renderLegs(); renderMap(); renderComp(); renderCall();
+                   renderSchedule(); renderTasks(); renderReadback(); renderAgenda(); }
+function activeLeg(){ return D.legs.find(l=>l.state === "now"); }
+
+function renderPass(){
+  const first = D.legs[0], last = D.legs[D.legs.length-1];
+  $("origin").textContent = first.from;
+  $("originCity").textContent = (AIRPORTS[first.from]||{}).city || "";
+  $("dest").textContent = last.to === "PDK" ? "ZAG" : last.to;
+  $("destCity").textContent = (AIRPORTS[last.to]||{}).city || "";
+  const done = D.legs.filter(l=>l.state==="done").length;
+  const a = activeLeg();
+  const idx = a ? D.legs.indexOf(a) : done;
+  $("plane").style.left = Math.min(100, Math.round(((idx + (a?0.5:0)) / D.legs.length)*100)) + "%";
+  $("legCount").textContent = `${done} of ${D.legs.length} legs complete`;
+  $("curFlight").textContent = a ? `${a.from}→${a.to} · ${a.flight}`
+    : (done===D.legs.length ? "Arrived" : "On the ground");
+  const next = D.legs.find(l=>l.state === "wait");
+  $("nextUp").textContent = next ? `${next.from}→${next.to} · ${next.flight}` : "—";
+  const st = done === D.legs.length ? "At the paddock" : (a ? D.shipStatus : "On the ground");
+  $("shipStatus").textContent = st;
+  $("liveLabel").textContent = st;
+  let bars = ""; const digits = "50120737345".split("").map(Number);
+  for(let i=0;i<26;i++){ const d = digits[i%digits.length];
+    bars += `<span style="width:${1+((d+i*3)%4)}px;opacity:${0.55+((d+i)%5)*0.09}"></span>`; }
+  $("bars").innerHTML = bars;
+}
+
+const LEGSTATE = ["wait","now","done"];
+const LEGLABEL = {wait:["Scheduled","tag-neutral"], now:["Moving","tag-accent"], done:["Complete","tag-ok"]};
+
+function renderLegs(){
+  $("legs").innerHTML = D.legs.map((l,i)=>{
+    const [lab,cls] = LEGLABEL[l.state];
+    const air = l.mode === "air";
+    const path = [l.from, ...(l.via||[]), l.to];
+    const link = air
+      ? `<a href="https://www.flightradar24.com/data/flights/${String(l.flight).toLowerCase().replace(/\s+/g,"")}" target="_blank" rel="noopener">track</a>`
+      : "";
+    return `<div class="leg">
+      <div class="sector">${path.join(`<span class="arw">${air?"✈":"→"}</span>`)}</div>
+      <div class="bits">
+        <span>${air?"Flight":"Transport"} <b data-p="legs.${i}.flight" ${ce()}>${esc(l.flight)}</b></span>
+        <span>${air?"Aircraft":"By"} <b data-p="legs.${i}.ac" ${ce()}>${esc(l.ac)}</b></span>
+        <span>Time <b data-p="legs.${i}.block" ${ce()}>${esc(l.block)}</b></span>
+        <span>${air?"Off":"Left"} <b data-p="legs.${i}.dep" ${ce()}>${l.dep?esc(l.dep):"—"}</b></span>
+        <span>${air?"On":"Arrived"} <b data-p="legs.${i}.arr" ${ce()}>${l.arr?esc(l.arr):"—"}</b></span>
+        ${link}
+      </div>
+      <span class="tag ${cls}" data-leg="${i}" ${isAdmin?'style="cursor:pointer"':""}>${lab}</span>
+    </div>`;
+  }).join("");
+  $("legs").querySelectorAll("[data-leg]").forEach(el=>el.onclick=()=>{
+    if(!isAdmin) return;
+    const l = D.legs[+el.dataset.leg];
+    l.state = LEGSTATE[(LEGSTATE.indexOf(l.state)+1)%LEGSTATE.length];
+    save(); render();
+  });
+  bindEdits();
+}
+
+function renderMap(){
+  if(!window.L) return;
+  const codes = [D.legs[0].from];
+  D.legs.forEach(l=>{ (l.via||[]).forEach(v=>codes.push(v)); codes.push(l.to); });
+  const pts = codes.map(c=>AIRPORTS[c]).filter(Boolean);
+  if(!map){
+    map = L.map("map", {scrollWheelZoom:false}).setView([42,32], 4);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      {attribution:'© OpenStreetMap, © CARTO', maxZoom:18}).addTo(map);
+    map._g = L.layerGroup().addTo(map);
+  }
+  map._g.clearLayers();
+  const line = L.polyline(pts.map(p=>[p.lat,p.lon]), {color:"#c67139", weight:2.5, dashArray:"6 8"}).addTo(map._g);
+  D.legs.forEach(l=>{
+    if(l.state !== "done") return;
+    const seq = [l.from, ...(l.via||[]), l.to].map(c=>AIRPORTS[c]).filter(Boolean);
+    L.polyline(seq.map(p=>[p.lat,p.lon]), {color:"#7a8a5e", weight:3}).addTo(map._g);
+  });
+  pts.forEach(p=>L.circleMarker([p.lat,p.lon],
+    {radius:6, color:"#2e2b25", weight:2, fillColor:"#f9f4ed", fillOpacity:1})
+    .addTo(map._g).bindTooltip(p.city));
+  const a = activeLeg();
+  if(a){
+    const seq = [a.from, ...(a.via||[]), a.to].map(c=>AIRPORTS[c]).filter(Boolean);
+    if(seq.length >= 2){
+      const p1 = seq[0], p2 = seq[seq.length-1];
+      L.marker([(p1.lat+p2.lat)/2, (p1.lon+p2.lon)/2], {icon:L.divIcon({className:"", html:
+        `<div style="font-size:22px;line-height:1;color:#8c491a;transform:translate(-50%,-50%)">${a.mode==="air"?"✈":"🚚"}</div>`})})
+        .addTo(map._g).bindTooltip(`${a.from} → ${a.to}`);
+    }
+  }
+  map.fitBounds(line.getBounds(), {padding:[30,30]});
+}
+
+/* competition */
+const CYCLE = ["pending","progress","passed","failed","na"];
+const CHECK = {pending:["Not yet","tag-neutral"], progress:["In progress","tag-accent"],
+  passed:["Passed","tag-ok"], failed:["Failed","tag-bad"], na:["N/A","tag-neutral"]};
+
+function evTabs(id){
+  $(id).innerHTML = Object.keys(EVENTS).map(k=>
+    `<button data-e="${k}" aria-selected="${k===ev}">${EVENTS[k].label}</button>`).join("");
+  $(id).querySelectorAll("button").forEach(b=>b.onclick=()=>{ ev = b.dataset.e; day = null; render(); });
+}
+function renderComp(){
+  evTabs("evtabs1");
+  const c = D.comps[ev];
+  const passed = c.scrutineering.filter(s=>s.s==="passed").length;
+  const total = c.scrutineering.filter(s=>s.s!=="na").length;
+  $("checkHint").textContent = isAdmin ? `${passed}/${total} passed · tap a card to change it` : `${passed}/${total} passed`;
+  $("checksGrid").innerHTML = c.scrutineering.map((s,i)=>{
+    const [lab,cls] = CHECK[s.s];
+    return `<div class="check ${s.s}" data-c="${i}"><span>${esc(s.n)}</span><span class="tag ${cls}">${lab}</span></div>`;
+  }).join("");
+  $("checksGrid").querySelectorAll("[data-c]").forEach(el=>el.onclick=()=>{
+    if(!isAdmin) return;
+    const s = D.comps[ev].scrutineering[+el.dataset.c];
+    s.s = CYCLE[(CYCLE.indexOf(s.s)+1)%CYCLE.length];
+    save(); renderComp();
+  });
+  $("dyn").innerHTML = rows(c.dynamic, "dynamic");
+  $("stat").innerHTML = rows(c.static, "static");
+  $("ovRank").innerHTML = cell(c.overall.rank, `comps.${ev}.overall.rank`);
+  $("ovPts").innerHTML = cell(c.overall.points, `comps.${ev}.overall.points`);
+  bindEdits();
+}
+function rows(list, kind){
+  return list.map((x,i)=>`<tr><td>${esc(x.n)}</td>
+    <td>${cell(x.r, `comps.${ev}.${kind}.${i}.r`)}</td>
+    <td class="num">${cell(x.p, `comps.${ev}.${kind}.${i}.p`)}</td>
+    <td class="num">${cell(x.k, `comps.${ev}.${kind}.${i}.k`)}</td></tr>`).join("");
+}
+function cell(v, path){
+  const blank = (v==="" || v==null);
+  return `<span${blank?' class="muted"':""} data-p="${path}" ${ce()}>${blank?"—":esc(String(v))}</span>`;
+}
+function ce(){ return isAdmin ? 'contenteditable="true"' : ""; }
+function bindEdits(){
+  if(!isAdmin) return;
+  document.querySelectorAll("[data-p]").forEach(el=>{
+    el.onblur = ()=>{ let v = el.textContent.trim(); if(v==="—") v="";
+      setPath(D, el.dataset.p, v); save(); render(); };
+    el.onkeydown = e=>{ if(e.key==="Enter"){ e.preventDefault(); el.blur(); } };
+  });
+}
+function setPath(o, path, val){
+  const p = path.split("."); let t = o;
+  for(let i=0;i<p.length-1;i++) t = t[p[i]];
+  t[p[p.length-1]] = val;
+}
+
+/* schedule */
+function renderCall(){
+  const c = D.call[ev] || {};
+  $("kWake").textContent = c.wake || "—";
+  $("kPit").textContent = c.pit || "—";
+  $("kFirst").textContent = c.first || "—";
+  $("kDrivers").textContent = c.drivers || "—";
+  $("kRadios").textContent = c.radios || "—";
+  ["Wake","Pit","First","Drivers","Radios"].forEach(k=>$("e"+k).value = c[k.toLowerCase()] || "");
+}
+$("saveCall").onclick = ()=>{
+  D.call[ev] = {wake:$("eWake").value.trim(), pit:$("ePit").value.trim(), first:$("eFirst").value.trim(),
+    drivers:$("eDrivers").value.trim(), radios:$("eRadios").value.trim()};
+  save(); renderCall();
+};
+
+function renderSchedule(){
+  evTabs("evtabs2");
+  const days = EVENTS[ev].days;
+  if(!day || !days.includes(day)) day = days.includes(today()) ? today() : days[0];
+  $("days").innerHTML = days.map(d=>{
+    const dt = new Date(d+"T12:00:00");
+    return `<button data-d="${d}" aria-selected="${d===day}">${dt.toLocaleDateString([], {weekday:'short',day:'2-digit'})}${d===today()?" ●":""}</button>`;
+  }).join("");
+  $("days").querySelectorAll("button").forEach(b=>b.onclick=()=>{ day=b.dataset.d; renderSchedule(); });
+  $("schedNote").textContent = EVENTS[ev].note;
+
+  const items = D.schedule.filter(s=>s.date===day).sort((a,b)=>a.t.localeCompare(b.t));
+  const now = new Date().toTimeString().slice(0,5);
+  const isToday = day === today();
+  $("schedList").innerHTML = items.length ? items.map((s,i)=>{
+    const nxt = items[i+1];
+    const live = isToday && s.t <= now && (!nxt || nxt.t > now);
+    return `<li class="${isToday && s.t < now && !live ? "past" : ""} ${live?"now":""}">
+      <span class="tm">${esc(s.t)}</span>
+      <span>${esc(s.d)}${s.who?`<span class="who2">${esc(s.who)}</span>`:""}
+      ${isAdmin?`<button class="btn btn-sm btn-secondary" data-del="${s.id}" style="margin-top:8px">Remove</button>`:""}</span>
+    </li>`;
+  }).join("")
+    : `<li style="grid-template-columns:1fr"><span class="muted">Nothing scheduled for this day.</span></li>`;
+  $("schedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    D.schedule = D.schedule.filter(x=>x.id!==b.dataset.del); save(); renderSchedule(); });
+  if(!$("sDate").value) $("sDate").value = day;
+}
+$("addSched").onclick = ()=>{
+  const d=$("sDate").value, t=$("sTime").value.trim(), what=$("sWhat").value.trim();
+  if(!d||!t||!what) return;
+  D.schedule.push({id:uid(), date:d, t, d:what, who:$("sWho").value.trim()});
+  $("sWhat").value=""; $("sWho").value=""; $("sTime").value="";
+  save(); renderSchedule();
+};
+$("reseed").onclick = ()=>{
+  const custom = D.schedule.filter(s=>!s.official);
+  D.schedule = seedSchedule().concat(custom);
+  save(); renderSchedule();
+};
+
+/* tasks */
+const NEXT = {open:"doing", doing:"done", done:"open"};
+const ACTION = {open:["Start","btn-secondary"], doing:["✓ Mark done","btn-ok"], done:["Reopen","btn-secondary"]};
+const TSTAT = {open:["Open","tag-neutral"], doing:["In progress","tag-accent"], done:["Done","tag-ok"]};
+
+function taskCard(t){
+  const mine = isAdmin || t.owner === me;
+  const [lab,cls] = TSTAT[t.status];
+  const [alab,acls] = ACTION[t.status];
+  return `<div class="task ${t.priority} ${t.status==="done"?"done":""}">
+    <div class="ttl">${esc(t.title)}</div>
+    <div class="meta"><span>Owner <b>${esc(t.owner||"unassigned")}</b></span>
+      <span>Due <b>${esc(t.deadline||"—")}</b></span><span>${esc(t.event)}</span></div>
+    <div class="row"><span class="tag ${cls}">${lab}</span>
+      ${t.priority==="critical"?`<span class="tag tag-bad">Critical</span>`:""}
+      ${mine?`<button class="btn btn-sm ${acls}" data-next="${t.id}">${alab}</button>`:""}
+      ${isAdmin?`<button class="btn btn-sm btn-secondary" data-re="${t.id}">Reassign</button>
+                 <button class="btn btn-sm btn-secondary" data-drop="${t.id}">Delete</button>`:""}
+    </div></div>`;
+}
+function renderTasks(){
+  const keep = $("fOwner").value;
+  $("fOwner").innerHTML = `<option value="">Everyone</option>` +
+    D.members.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  $("fOwner").value = keep || "";
+  $("tOwner").innerHTML = `<option value="">Unassigned</option>` +
+    D.members.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+
+  const fo=$("fOwner").value, fs=$("fStatus").value, fp=$("fPriority").value, fe=$("fEvent").value;
+  const list = D.tasks.filter(t=>(!fo||t.owner===fo)&&(!fs||t.status===fs)&&(!fp||t.priority===fp)&&(!fe||t.event===fe));
+  $("taskList").innerHTML = list.length ? list.map(taskCard).join("")
+    : `<p class="muted" style="margin:0">No tasks match this filter.</p>`;
+
+  document.querySelectorAll("[data-next]").forEach(b=>b.onclick=()=>{
+    const t = D.tasks.find(x=>x.id===b.dataset.next); t.status = NEXT[t.status]; save(); renderTasks(); });
+  document.querySelectorAll("[data-drop]").forEach(b=>b.onclick=()=>{
+    D.tasks = D.tasks.filter(x=>x.id!==b.dataset.drop); save(); renderTasks(); });
+  document.querySelectorAll("[data-re]").forEach(b=>b.onclick=()=>{
+    const t = D.tasks.find(x=>x.id===b.dataset.re);
+    const who = prompt("Reassign to (exact name, blank to unassign):", t.owner||"");
+    if(who===null) return;
+    t.owner = D.members.find(n=>n.toLowerCase()===who.trim().toLowerCase()) || "";
+    save(); renderTasks(); });
+}
+["fOwner","fStatus","fPriority","fEvent"].forEach(id=>$(id).onchange = renderTasks);
+$("addTask").onclick = ()=>{
+  const title = $("tTitle").value.trim(); if(!title) return;
+  D.tasks.unshift({id:uid(), title, owner:$("tOwner").value, deadline:$("tDeadline").value.trim(),
+    priority:$("tPriority").value, event:$("tEvent").value, status:"open"});
+  $("tTitle").value=""; $("tDeadline").value=""; save(); renderTasks();
+};
+$("clearDone").onclick = ()=>{ D.tasks = D.tasks.filter(t=>t.status!=="done"); save(); renderTasks(); };
+$("editMembers").onclick = ()=>{ $("memberBox").classList.toggle("hide"); $("mList").value = D.members.join("\n"); };
+$("saveMembers").onclick = ()=>{
+  const names = $("mList").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!names.length) return;
+  D.members = names; $("memberBox").classList.add("hide"); save(); render();
+};
+
+/* read-back */
+function renderReadback(){
+  if(D.readback.date !== today()){ D.readback = {date:today(), checks:READBACK.map(()=>false)}; }
+  const d = new Date(today()+"T12:00:00");
+  $("rbDate").textContent = d.toLocaleDateString([], {weekday:'long', day:'2-digit', month:'short'});
+  $("rbList").innerHTML = READBACK.map((q,i)=>
+    `<li class="${D.readback.checks[i]?"on":""}"><span class="box" data-rb="${i}">✓</span><span>${esc(q)}</span></li>`).join("");
+  $("rbList").querySelectorAll("[data-rb]").forEach(el=>el.onclick=()=>{
+    if(!me){ dlg.showModal(); return; }
+    const i = +el.dataset.rb;
+    D.readback.checks[i] = !D.readback.checks[i];
+    save(); renderReadback();
+  });
+}
+$("rbReset").onclick = ()=>{ D.readback = {date:today(), checks:READBACK.map(()=>false)}; save(); renderReadback(); };
+
+function renderAgenda(){
+  $("agenda").innerHTML = AGENDA.map(([t,items],i)=>`
+    <details${i===0?" open":""}>
+      <summary><span class="n">${String(i+1).padStart(2,"0")}</span><span>${esc(t)}</span></summary>
+      <div class="cnt"><ul>${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    </details>`).join("");
+}
+
+(async function(){
+  await initBackend();
+  render();
+  setTimeout(()=>{ if(map) map.invalidateSize(); }, 200);
+})();
+</script>
+</body>
+</html>
