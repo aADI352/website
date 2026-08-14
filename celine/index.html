@@ -458,7 +458,37 @@ const CONFIG = {
   adminPassword: "FTadmin"
 };
 
-const MEMBERS = Array.from({length:30}, (_,i)=>`Member ${String(i+1).padStart(2,"0")}`);
+/* Crew list. Sign in with any of these names + the crew password.
+   Admin can change the list in-app: Tasks -> Edit crew list. */
+const MEMBERS = [
+  "Abdalla Kananeh",
+  "Abed Yassin",
+  "Adi Atrash",
+  "Amjad Sadi",
+  "Daniel",
+  "Faheem",
+  "Gabriel Ganeles",
+  "Haneen",
+  "Jawad Soliman",
+  "Layan Abu Elhija",
+  "Majd Jaraisy",
+  "Mansour",
+  "Masaad Ayoub",
+  "Noor Kina'an",
+  "Omri Haquin",
+  "Raghad Waked",
+  "Ran",
+  "Rani Bassal",
+  "Roaya",
+  "Ryan Fodi",
+  "Salih Bishara",
+  "Seba Hamed",
+  "Shay Neuhaus",
+  "Tony Malshy",
+  "Yahli",
+  "Yarin",
+  "Yoel"
+];
 
 const AIRPORTS = {
   TLV:{lat:32.011,lon:34.887,city:"Tel Aviv"},
@@ -807,13 +837,25 @@ async function pull(){
 }
 async function save(){
   if(mode === "cloud"){
+    const payload = {id:CONFIG.rowId, data:D, updated_at:new Date().toISOString()};
     try{
-      const {data, error} = await sb.from(CONFIG.table)
-        .upsert({id:CONFIG.rowId, data:D, updated_at:new Date().toISOString()})
-        .select("id");
+      // Try upsert first: it creates the row if it's missing.
+      let {data, error} = await sb.from(CONFIG.table).upsert(payload).select("id");
+      // No insert policy? Fall back to a plain update of an existing row.
+      if(error && (error.code === "42501" || /row-level security/i.test(error.message||""))){
+        const r = await sb.from(CONFIG.table)
+          .update({data:D, updated_at:payload.updated_at}).eq("id", CONFIG.rowId).select("id");
+        data = r.data; error = r.error;
+        if(!error && (!data || !data.length)){
+          lastError = "row " + CONFIG.rowId + " does not exist and this key may not create it — "
+                    + "run the insert in the Supabase SQL editor";
+          setSync("⚠ nothing saved: " + lastError, true);
+          return;
+        }
+      }
       if(error) throw error;
       if(!data || !data.length){
-        lastError = "the write touched 0 rows — check the row exists and the policies allow it";
+        lastError = "the write touched 0 rows — row " + CONFIG.rowId + " is missing";
         setSync("⚠ nothing was saved: " + lastError, true);
         return;
       }
