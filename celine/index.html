@@ -420,6 +420,11 @@ dialog .body{padding:20px 26px 24px}
       </div>
     </section>
   </div>
+  <footer style="margin-top:var(--space-4);padding-top:var(--space-4);
+    border-top:1px solid var(--color-divider);font-size:12px;
+    color:color-mix(in srgb,var(--color-text) 40%,transparent)">
+    <a href="https://adidi.at" style="color:inherit;text-decoration:none">adidi.at</a>
+  </footer>
 </div>
 
 <dialog id="login">
@@ -448,7 +453,6 @@ dialog .body{padding:20px 26px 24px}
 /* ============================================================
    1. CONFIG
    ============================================================ */
-
 const CONFIG = {
   supabaseUrl: "https://crlhaxxyaecsuggbbkle.supabase.co",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNybGhheHh5YWVjc3VnZ2Jia2xlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY2ODI2NjUsImV4cCI6MjEwMjI1ODY2NX0.gGgnuRgQqt32QLqFo7gEfMH_C_H9lYRyBK_qhvGtFZM",
@@ -458,6 +462,7 @@ const CONFIG = {
   adminUser: "FTadmin",
   adminPassword: "FTadmin"
 };
+const BUILD = "2026-08-14f";   // shown in the diagnostics popup
 
 /* Crew list. Sign in with any of these names + the crew password.
    Admin can change the list in-app: Tasks -> Edit crew list. */
@@ -1233,6 +1238,8 @@ function renderAgenda(){
 /* diagnostics: click the status bar for the full picture */
 document.querySelector(".bar").onclick = async ()=>{
   const lines = [
+    "Build: " + BUILD + " · crew list: " + D.members.length + " names",
+    "First name in list: " + (D.members[0] || "—"),
     "Mode: " + (mode === "cloud" ? "connected to Supabase" : "LOCAL ONLY — no database"),
     "supabaseUrl set: " + (CONFIG.supabaseUrl ? "yes" : "NO — this is why nothing saves"),
     "anon key set: " + (CONFIG.supabaseAnonKey ? "yes" : "NO"),
