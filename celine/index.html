@@ -213,16 +213,21 @@ dialog .body{padding:20px 26px 24px}
   .pill{width:100%;justify-content:space-between;padding:8px 10px 8px 14px}
   .pill #whoLabel{margin-left:auto}
 
-  .pass .main{flex:1 1 100%;padding:20px 18px;gap:18px}
-  .pass .code{font-size:40px}
-  .pass .line{flex:1 1 70px;min-width:60px}
+  .pass .main{flex:1 1 100%;padding:18px 16px;gap:16px}
+  .pass .route{gap:10px;align-items:flex-start}
+  .pass .code{font-size:34px}
+  .pass .city{font-size:9px;letter-spacing:.1em;text-transform:uppercase;white-space:normal}
+  .pass .line{flex:1 1 40px;min-width:34px;padding-top:12px}
+  .pass .line .kicker{font-size:8px;letter-spacing:.1em}
+  .pass .facts{gap:12px 10px}
+  .pass .facts .v{font-size:13px}
   .stub{flex:1 1 100%;border-left:0;border-top:2px dashed var(--color-neutral-400);
-    flex-direction:row;align-items:flex-end;justify-content:space-between;padding:20px 18px}
+    flex-direction:row;align-items:center;justify-content:space-between;padding:16px}
   .stub .notch{top:-11px;bottom:auto}
   .stub .notch.t{left:-11px}
   .stub .notch.b{left:auto;right:-11px}
-  .stub .seat{font-size:28px}
-  .bars{height:44px} .bars span{height:44px}
+  .stub .seat{font-size:24px}
+  .bars{height:34px} .bars span{height:34px}
 
   .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
     scrollbar-width:none;padding-bottom:2px;margin:0 -14px;padding-left:14px;padding-right:14px}
@@ -256,7 +261,10 @@ dialog .body{padding:20px 26px 24px}
 
 @media (max-width:420px){
   .top h1{font-size:38px}
-  .pass .code{font-size:34px}
+  .pass .code{font-size:30px}
+  .pass .line{flex:1 1 26px;min-width:22px}
+  .pass .line .kicker{display:none}
+  .stub .seat{font-size:21px}
   .filters{grid-template-columns:1fr}
   .big{grid-template-columns:1fr}
 }
@@ -275,6 +283,16 @@ dialog .body{padding:20px 26px 24px}
     </div>
   </header>
 
+  <div class="tabs" role="tablist" id="tabs">
+    <button data-t="track" aria-selected="true">Tracker</button>
+    <button data-t="comp" aria-selected="false">Competition</button>
+    <button data-t="today" aria-selected="false">Schedule</button>
+    <button data-t="tasks" aria-selected="false">Tasks</button>
+    <button data-t="meet" aria-selected="false">End of day</button>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="pane" id="pane-track">
   <section class="pass">
     <div class="main">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
@@ -309,17 +327,6 @@ dialog .body{padding:20px 26px 24px}
       <div class="bars" id="bars"></div>
     </div>
   </section>
-
-  <div class="tabs" role="tablist" id="tabs">
-    <button data-t="track" aria-selected="true">Tracker</button>
-    <button data-t="comp" aria-selected="false">Competition</button>
-    <button data-t="today" aria-selected="false">Schedule</button>
-    <button data-t="tasks" aria-selected="false">Tasks</button>
-    <button data-t="meet" aria-selected="false">End of day</button>
-  </div>
-
-  <!-- TRACKER -->
-  <div class="pane" id="pane-track">
     <section>
       <h2 class="sect">Location</h2>
       <div class="card">
@@ -518,7 +525,7 @@ const CONFIG = {
   adminUser: "FTadmin",
   adminPassword: "FTadmin"
 };
-const BUILD = "2026-08-14k";   // shown in the diagnostics popup
+const BUILD = "2026-08-14l";   // shown in the diagnostics popup
 
 /* Crew list. Sign in with any of these names + the crew password.
    Admin can change the list in-app: Tasks -> Edit crew list. */
