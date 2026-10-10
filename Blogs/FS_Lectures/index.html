@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GS20Y8XJKS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GS20Y8XJKS');
+</script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Formula Student made lectures feel pointless. Here's why, whether Israeli universities should drop the fourth year, and what I'd change instead.">
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏎️</text></svg>">
+        <link rel="stylesheet" type="text/css" href="../blogstyle.css">
+        <title>Formula Student Ruined Lectures for Me - Adi Atrash</title>
+        <style>
+            .mainhw h2 {
+                font-size: 2rem;
+                font-weight: 600;
+                color: var(--text);
+                margin-top: 2.5rem;
+                margin-bottom: 0.5rem;
+            }
+            .post-list {
+                font-size: 1.65rem;
+                color: var(--text-light);
+                line-height: 1.85;
+                margin: 0.5rem 0 1.5rem 2rem;
+            }
+            .post-list li { margin-bottom: 0.6rem; list-style: disc; }
+            .post-list li b { color: var(--text); font-weight: 600; font-size: inherit; }
+            .post-fig { margin: 2rem 0; text-align: center; }
+            .post-fig img {
+                width: 100%;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+            }
+            .post-fig figcaption {
+                font-size: 1.2rem;
+                color: var(--text-muted);
+                margin-top: 6px;
+            }
+            .mainhw a.inline { color: #2563eb; text-decoration: underline; }
+        </style>
+    </head>
+
+    <body>
+        <div id="header">
+            <h1 class="nametl"><a href="https://adidi.at">Adi Atrash</a></h1>
+            <img class="avatar" src="../../1713938565415.jpg" alt="profile picture of adi atrash">
+            <a href="/about" class="abt">About</a>
+            <a href="../" class="abt">Blog</a>
+            <a href="../../resume/" class="abt">Resume</a>
+        </div>
+
+        <div class="mainhw">
+            <div class="top">
+                <h1>Formula Student ruined lectures for me (and why we should scrap fourth year)</h1>
+                <br>
+                <b>2026-10-11 01:50:00</b>
+                <br><br>
+
+                <p>
+                    Imagine sitting in a 9am lecture watching a concept get introduced on the board for the first time, when just yesterday evening you were already applying the same thing at 10x the fidelity and complexity.
+                    <br><br>
+                    That's been most of my second year. Not bored exactly, just not impressed anymore. I'd watch something get derived and think "yeah, I already built that, and mine had more stuff in it". That's what a year and a bit on the Technion Formula Student team does to you.
+                    <br><br>
+                    This post is half a rant and half an honest attempt at figuring out if that feeling actually means something. Spoiler: I started out wanting to argue that we should drop the fourth year of the degree, and ended up somewhere more boring but probably more correct.
+                </p>
+
+                <h2 id="lectures">Why lectures stopped feeling impressive</h2>
+                <p>
+                    The clearest example for me was fluids. In the course we spent weeks on Joukowski airfoils and conformal transformations, thin airfoil theory and potential flow around cylinders. At the same time, on the team, we were developing our own CFD methods and trying to understand how the wings interact with each other, and where viscous and turbulent effects take over. Those are exactly the things the classical models leave out on purpose (some of it is in my <a class="inline" href="../AMR/">CFD post</a>).
+                </p>
+
+                <figure class="post-fig">
+                    <img src="../AMR/src/fs_full_car.png" alt="CFD of the full Formula Student car">
+                    <figcaption>Full car CFD from the team side</figcaption>
+                </figure>
+
+                <p>
+                    I know now that the idealised models are there for good reasons, but at the time switching between the two felt strange. In the evening I was dealing with the messy viscous version of the problem, and the next morning we were assuming viscosity away. At some point I told a friend the course was complete BS, and back then I meant it. I also said it a bit too loud, and the professor heard me. Not my proudest moment.
+                    <br><br>
+                    Looking back, I was wrong. CFD gives you nice colours whether or not the answer is right. What tells you if a result is believable is exactly the "boring" classical stuff: boundary layers, where separation should happen, what the turbulence model is actually assuming, dimensional analysis to sanity check the forces. If the solver says a wing makes some crazy amount of downforce, it's thin airfoil theory and basic Reynolds number intuition that make me go "no it doesn't" before I tell the rest of the team. The course wasn't BS. I just took it in the wrong order.
+                    <br><br>
+                    It's not only fluids. Statics, dynamics, materials, control: almost every core course has a moment where I think "we did this on the car, with real loads, a real deadline and real consequences if it's wrong". A lecture can't really compete with a part you designed coming back from the machine shop.
+                    <br><br>
+                    The weird part is that I've always been a curious person. I've always enjoyed learning new stuff, even when it had nothing to do with the things that really make me go crazy. So at first I thought something was off with me. Then I realised I hadn't stopped being curious at all. I was just getting my fix from somewhere else.
+                </p>
+
+                <h2 id="fourth-year">Do we even need a fourth year?</h2>
+                <p>
+                    This is where the rant turns into an argument. First, to be clear: I think the basics from the first three years are hugely important. Fluids, structures, dynamics, thermo, control. That's the foundation. Fluids is a second year core course, and the story above is me learning the hard way why it belongs there. My problem is with what comes after.
+                    <br><br>
+                    The niche fourth year courses are supposed to be where you take the theory from the first three years and apply it to "practical" problems. That's a good goal. But doing it in a frontal lecture course just doesn't work. You don't learn to apply something by watching someone else apply it on a board and then taking an exam on it.
+                </p>
+                <ul class="post-list">
+                    <li><b>The core is done by year 3.</b> After that it's mostly electives and a final project.</li>
+                    <li><b>FS is a much better format for applying theory.</b> You design to a ruleset, on a budget and a deadline, manufacture it, test it, then defend your design choices in front of judges. Nothing in a fourth year course comes close.</li>
+                    <li><b>Europe and the UK do 3-year bachelor's degrees</b> and nobody thinks their engineers are bad.</li>
+                </ul>
+                <p>Put like that it sounds like a slam dunk.</p>
+
+                <h2 id="to-be-fair">OK, to be fair</h2>
+                <p>Then I tried arguing the other side and it got a lot less clean.</p>
+                <ul class="post-list">
+                    <li><b>FS members are self-selected.</b> "FS people don't need year 4" says nothing about the average student who never touched a real project.</li>
+                    <li><b>FS usually makes degrees longer, not shorter.</b> Plenty of team members take a lighter load and finish late. Hard to argue for cutting a year when the club itself adds one.</li>
+                    <li><b>The Europe comparison is misleading.</b> A 3-year bachelor's there is normally followed by a 2-year master's, so it's 5 years to a "full" engineer, which is more than our 4.</li>
+                    <li><b>Accreditation and US grad admissions expect 4 years.</b> A 3-year degree from Israel could make applying abroad harder, not easier.</li>
+                </ul>
+                <p>
+                    The self-selection one is the one I thought about the most. What about the students who don't do FS? Honestly I think they're an argument for changing fourth year, not for keeping it. Big companies redo the entire training for new engineers anyway, no matter what courses you took. Smaller companies would rather take a student with real, useful experience than one with a list of fourth year electives. Nobody in industry is hiring you because of those courses. So even for students who never touched FS, a year where the industry does the teaching would be worth a lot more than another round of frontal courses.
+
+                </p>
+
+                <h2 id="change">What I'd actually change</h2>
+                <p>So yes, I'd remove it. A three year bachelor's, with the useful parts of fourth year moved to where they actually work:</p>
+                <ul class="post-list">
+                    <li><b>Industry placement.</b> Something like the practical semester a lot of German degrees have, where you spend a semester working at a company as part of the degree. Companies do the training and the application of theory in practice, since that's what they end up doing anyway.</li>
+                    <li><b>Keep the projects.</b> FS already counts as a project in the degree, which kind of proves the point: the part of the later years that actually works is the project, not the courses. Keep that, drop the courses around it.</li>
+                    <li><b>An MSc for whoever wants more theory.</b> 3+2, same as Europe. This also deals with the accreditation and US grad school problem, since anyone going that route ends up with a master's anyway.</li>
+                </ul>
+                <p>
+                    And the first three years stay exactly as theory heavy as they are. Theory should stay theory, not get diluted with "real world" examples to make it feel practical. Applying it is what FS, placements and an MSc are for.
+                </p>
+
+                <h2 id="lucky">Ruined, or lucky?</h2>
+                <p>
+                    Honestly, I know I'm lucky to even have this problem. Most people in my lectures haven't seen the stuff on the board actually do anything yet. I have, so the lecture feels slow. That's annoying, but it's not really ruining anything. If anything it makes the theory easier to get.
+                    <br><br>
+                    Fourth year is still a waste of time though.
+                    <br><br>
+                    If you're on an FS team (Technion or anywhere else) and feel the same, or think I'm completely wrong about fourth year, message me on <a class="inline" href="https://x.com/AtrashAdi">twitter</a> or <a class="inline" href="https://www.linkedin.com/in/adi-atrash-6857b1197/">linkedin</a>.
+                </p>
+            </div>
+        </div>
+
+        <div id="nav">
+            <ul>
+                <li><a href="https://x.com/AtrashAdi"><span>twitter</span></a></li>
+                <li><a href="https://www.linkedin.com/in/adi-atrash-6857b1197/"><span>linkedin</span></a></li>
+                <li><a href="https://github.com/aADI352"><span>github</span></a></li>
+                <li><a href="../../Courses/"><span>courses</span></a></li>
+                <li><a href="../../resume/"><span>resume</span></a></li>
+            </ul>
+        </div>
+
+        <div id="footer">&copy; 2026 Adi Atrash</div>
+    </body>
+</html>
