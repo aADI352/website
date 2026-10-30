@@ -94,6 +94,7 @@ void main(){
 const DISP = HEAD + `
 uniform sampler2D uU, uM;
 uniform vec3 uInk; uniform float uK, uAlpha;
+uniform int uDark;
 out vec4 col;
 float rho(ivec2 p){ return texelFetch(uU, clamp(p, ivec2(0), uN-1), 0).x; }
 void main(){
@@ -106,8 +107,19 @@ void main(){
     float gx = rho(c+ivec2(1,0)) - rho(c-ivec2(1,0));
     float gy = rho(c+ivec2(0,1)) - rho(c-ivec2(0,1));
     float g = length(vec2(gx, gy))/rho(c);
-    float a = dim*uAlpha*(1.0 - exp(-uK*max(g - 0.012, 0.0)));
-    col = vec4(uInk*a, a);
+    float s = 1.0 - exp(-uK*max(g - 0.012, 0.0));
+    if (uDark == 1) {
+        // colour schlieren: hue = direction of the density gradient (colour-wheel cutoff filter)
+        float h = atan(gy, gx)/6.2831853 + 0.5;
+        vec3 rgb = clamp(abs(mod(h*6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
+        rgb = mix(vec3(1.0), rgb, 0.8);                   // keep it a bit pastel
+        rgb = mix(rgb, vec3(1.0), smoothstep(0.75, 1.0, s)*0.35);   // strongest gradients go hot white
+        float a = dim*uAlpha*s;
+        col = vec4(rgb*a, a);
+    } else {
+        float a = dim*uAlpha*s;
+        col = vec4(uInk*a, a);
+    }
 }`;
 
 function prog(fs) {
@@ -150,8 +162,8 @@ function freeAll() {
 }
 function setup() {
     const w = window.innerWidth, h = window.innerHeight;
-    // aim for ~220k cells max, never finer than 2 css px
-    CELL = Math.max(2, Math.ceil(Math.sqrt(w*h/220000)));
+    // 2 css px cells (same look as on a phone); only coarsen on very large screens
+    CELL = Math.max(2, Math.ceil(Math.sqrt(w*h/450000)));
     NX = Math.ceil(w/CELL); NY = Math.ceil(h/CELL);
     canvas.width = NX; canvas.height = NY;
     freeAll();
@@ -238,28 +250,58 @@ function draw() {
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     bind(pr, 'uU', 0, A.t); bind(pr, 'uM', 1, maskTex);
     gl.uniform2i(pr.u.uN, NX, NY);
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    gl.uniform1i(pr.u.uDark, dark ? 1 : 0);
     gl.uniform3f(pr.u.uInk, 0.12, 0.14, 0.18);
-    gl.uniform1f(pr.u.uK, 12.0); gl.uniform1f(pr.u.uAlpha, 0.65);
+    gl.uniform1f(pr.u.uK, 12.0); gl.uniform1f(pr.u.uAlpha, dark ? 0.9 : 0.65);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
 window.addEventListener('scroll', () => { maskDirty = true; }, { passive: true });
 let rt;
-window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { setup(); tc = 0; }, 150); });
+let lastW = window.innerWidth, lastH = window.innerHeight;
+window.addEventListener('resize', () => {
+    // phones fire resize when the URL bar slides; only restart on a real size change
+    const w = window.innerWidth, h = window.innerHeight;
+    if (w === lastW && Math.abs(h - lastH) < 0.25*lastH) return;
+    lastW = w; lastH = h;
+    clearTimeout(rt); rt = setTimeout(() => { setup(); tc = 0; buildMask(); preShock(); }, 150);
+});
 
 setup();
 buildMask();
-// shock tube cycle, in sim time: drive the left boundary, then let it run out and reset
-let tc = 0;
+// shock tube cycle. Real-time based so it runs the same at 60/120/144 Hz and on any screen size.
+const SHOCK_PX_PER_S = 60;       // on-screen shock speed
+const DRIVE_S = 3.5, PERIOD_S = 16;
+let tc = 0, acc = 0, last = 0;
+const simRate = () => SHOCK_PX_PER_S/CELL/VS_SHOCK;      // sim time units per real second
 function cycle() {
-    const cross = NX/VS_SHOCK;
-    return { drive: 0.45*cross, period: 1.9*cross };
+    const r = simRate(), cross = NX/VS_SHOCK;
+    return { drive: DRIVE_S*r, period: Math.min(1.9*cross, PERIOD_S*r) };
 }
-function frame() {
+// first shock starts already close to the photo so nobody waits for it on a wide screen
+function preShock() {
+    const pfp = document.querySelector('.pfp');
+    if (!pfp) return;
+    const x0 = Math.floor((pfp.getBoundingClientRect().left - 220)/CELL);
+    if (x0 < 4) return;
+    const d = ambient(NX*NY), E2 = P2/(GAMMA - 1) + 0.5*R2*U2*U2;
+    for (let j = 0; j < NY; j++) for (let i = 0; i < Math.min(x0, NX); i++) {
+        const k = 4*(j*NX + i);
+        d[k] = R2; d[k+1] = R2*U2; d[k+2] = 0; d[k+3] = E2;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, A.t);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, NX, NY, gl.RGBA, gl.FLOAT, d);
+}
+preShock();
+function frame(now) {
+    const dtReal = last ? Math.min((now - last)/1000, 0.1) : 0;
+    last = now;
     if (!document.hidden) {
         if (maskDirty) buildMask();
-        // ~9 s for the shock to cross the screen
-        const n = Math.min(12, Math.max(2, Math.round(NX/VS_SHOCK/9/60/DT)));
+        acc += dtReal*simRate();
+        const n = Math.min(16, Math.floor(acc/DT));
+        acc -= n*DT; if (acc > 4*DT) acc = 0;     // don't try to catch up after a stall
         const cy = cycle();
         for (let k = 0; k < n; k++) {
             step(1, tc < cy.drive);
@@ -270,6 +312,6 @@ function frame() {
     }
     requestAnimationFrame(frame);
 }
-requestAnimationFrame(() => { canvas.style.opacity = '1'; frame(); });
+requestAnimationFrame(t => { canvas.style.opacity = '1'; frame(t); });
 window.__shock = { step, draw, buildMask, get NX(){ return NX; } };
 })();
