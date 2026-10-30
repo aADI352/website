@@ -618,3 +618,43 @@ ul.cv-desc li {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* === CV download + print === */
+
+.cv-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    padding: 7px 14px;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.cv-download:hover {
+    border-color: var(--accent);
+    background: #f5f9ff;
+}
+
+@media print {
+    @page { margin: 13mm 14mm; }
+    html { font-size: 52%; }
+    .cv-entry { grid-template-columns: 1fr 118px; column-gap: 12px; }
+    .cv-desc, ul.cv-desc { max-width: none; }
+    #shockbg, .header-nav, .cp-btn, #nav, #footer, .cv-download { display: none !important; }
+    #container { max-width: none; padding: 0; }
+    #header { padding: 0 0 2px; }
+    #bottom { padding: 8px 0 0; }
+    .cv-summary { margin-top: 4px; }
+    .cv-section { margin-top: 18px; }
+    .cv-section-title { margin-bottom: 12px; break-after: avoid; }
+    .cv-entry { margin-bottom: 12px; }
+    .cv-org, .cv-role { break-after: avoid; }
+    .cv-skills-cat, ul.cv-desc li { break-inside: avoid; }
+    a { color: inherit; }
+}

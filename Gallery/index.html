@@ -14,103 +14,116 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌈</text></svg>">
         <link rel="stylesheet" type="text/css" href="../Blogs/blogstyle.css">
         <title>Gallery - Adi Atrash</title>
+    <meta name="description" content="Colorful fluid dynamics: Formula Student aero, SLS and Mars capsule shocks, spray combustion.">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Adi Atrash">
+    <meta property="og:title" content="Gallery - Adi Atrash">
+    <meta property="og:description" content="Colorful fluid dynamics: Formula Student aero, SLS and Mars capsule shocks, spray combustion.">
+    <meta property="og:url" content="https://adidi.at/Gallery/">
+    <meta property="og:image" content="https://adidi.at/Blogs/AMR/src/capsule_schlieren.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@AtrashAdi">
+    <link rel="canonical" href="https://adidi.at/Gallery/">
 
         <style>
             /* full-width page; header, footer and text stay in the site's centred column */
-            body {
-                max-width: none;
-                padding: 0 32px;
-            }
+            body { max-width: none; padding: 0 32px; }
             #header, #nav, #footer,
-            .mainhw .top > h1,
-            .mainhw .top > p,
-            .mainhw .top > h2,
-            .mainhw .top > h3 {
+            .mainhw .top > h1, .mainhw .top > p {
                 max-width: var(--max-width);
                 margin-left: auto;
                 margin-right: auto;
             }
-            /* centred wrapping rows: incomplete rows sit in the middle */
-            .gal-grid, .gal-grid.three, .gal-grid.one {
-                display: flex !important;
-                flex-wrap: wrap;
-                justify-content: center;
-                align-items: flex-start;
+            .subtitle { font-style: italic; color: var(--text-muted, #777); margin-top: 0.3rem; }
+
+            /* masonry: images keep their own aspect ratio, columns fill by width */
+            .gal-grid {
+                columns: 4 280px;
+                column-gap: 14px;
+                margin: 28px auto 0;
+                max-width: 1500px;
             }
-            .gal-grid figure            { flex: 0 0 calc(20% - 13px); }
-            .gal-grid.three figure      { flex-basis: calc(25% - 12px); }
-            .gal-grid.one figure        { flex-basis: calc(33.333% - 11px); }
-            @media (max-width: 1500px) {
-                .gal-grid figure        { flex-basis: calc(25% - 12px); }
-                .gal-grid.three figure  { flex-basis: calc(33.333% - 11px); }
-                .gal-grid.one figure    { flex-basis: calc(50% - 8px); }
+            .gal-grid figure {
+                break-inside: avoid;
+                margin: 0 0 14px;
+                position: relative;
+                border-radius: 10px;
+                overflow: hidden;
+                background: #f3f4f6;
+                cursor: zoom-in;
+                outline: none;
             }
-            @media (max-width: 1100px) {
-                .gal-grid figure,
-                .gal-grid.three figure  { flex-basis: calc(50% - 8px); }
-                .gal-grid.one figure    { flex-basis: calc(50% - 8px); }
+            .gal-grid img, .gal-grid video {
+                width: 100%;
+                height: auto;
+                display: block;
+                transition: transform 0.35s ease;
+            }
+            .gal-grid video { background: #000; }
+            .gal-grid figure:hover img, .gal-grid figure:hover video,
+            .gal-grid figure:focus-visible img, .gal-grid figure:focus-visible video { transform: scale(1.03); }
+            .gal-grid figure:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
+            .gal-grid figcaption {
+                position: absolute; left: 0; right: 0; bottom: 0;
+                padding: 28px 12px 10px;
+                font-size: 1.25rem; line-height: 1.4;
+                color: #fff; text-align: left;
+                background: linear-gradient(transparent, rgba(0,0,0,0.65));
+                opacity: 0; transform: translateY(6px);
+                transition: opacity 0.25s, transform 0.25s;
+                pointer-events: none;
+            }
+            .gal-grid figure:hover figcaption, .gal-grid figure:focus-visible figcaption { opacity: 1; transform: none; }
+            .gal-badge {
+                position: absolute; top: 10px; right: 10px;
+                font: 600 1.05rem system-ui, sans-serif; letter-spacing: .04em;
+                color: #fff; background: rgba(0,0,0,0.5);
+                padding: 3px 8px; border-radius: 5px;
+                pointer-events: none;
+            }
+            /* touch screens: captions always visible */
+            @media (hover: none) {
+                .gal-grid figcaption { opacity: 1; transform: none; }
             }
             @media (max-width: 700px) {
                 body { padding: 0 16px; }
-                .gal-grid figure,
-                .gal-grid.three figure,
-                .gal-grid.one figure    { flex-basis: 100%; }
+                .gal-grid { columns: 2 150px; column-gap: 10px; }
+                .gal-grid figure { margin-bottom: 10px; }
+                .gal-grid figcaption { font-size: 1.1rem; padding: 20px 8px 7px; }
             }
-            .mainhw .top > h3 {
-                font-size: 1.5rem;
-                font-weight: 600;
-                margin-top: 2rem;
+
+            /* lightbox */
+            .lb {
+                position: fixed; inset: 0; z-index: 1000;
+                display: none; flex-direction: column; align-items: center; justify-content: center;
+                background: rgba(8, 10, 14, 0.92);
+                backdrop-filter: blur(6px);
+                padding: 56px 64px 24px;
             }
-            .subtitle {
-                font-style: italic;
-                color: var(--text-muted, #777);
-                margin-top: 0.3rem;
+            .lb.open { display: flex; animation: lbIn 0.2s ease-out; }
+            @keyframes lbIn { from { opacity: 0; } to { opacity: 1; } }
+            .lb-media { max-width: 100%; max-height: calc(100% - 64px); display: flex; align-items: center; justify-content: center; }
+            .lb-media img, .lb-media video {
+                max-width: 100%; max-height: calc(100vh - 150px);
+                border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             }
-            .gal-section {
-                font-size: 2rem;
-                font-weight: 600;
-                margin-top: 3rem;
-                margin-bottom: 0.5rem;
+            .lb-cap { color: #e5e7eb; font-size: 1.45rem; margin-top: 16px; text-align: center; max-width: 900px; }
+            .lb-count { position: absolute; top: 18px; left: 22px; color: #9ca3af; font: 500 1.3rem ui-monospace, monospace; }
+            .lb button {
+                position: absolute; border: 0; background: rgba(255,255,255,0.08); color: #fff;
+                width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                transition: background 0.2s;
             }
-            .gal-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-                margin: 24px 0;
-            }
-            .gal-grid.three { grid-template-columns: repeat(3, 1fr); }
-            .gal-grid.one { grid-template-columns: 1fr; }
-            .gal-grid figure { margin: 0; }
-            .gal-grid img {
-                width: 100%;
-                height: auto;
-                display: block;
-                border-radius: 8px;
-                border: 1px solid var(--border);
-                cursor: pointer;
-                transition: transform 0.2s, box-shadow 0.2s;
-            }
-            .gal-grid video {
-                width: 100%;
-                height: auto;
-                display: block;
-                border-radius: 8px;
-                border: 1px solid var(--border);
-                background: #000;
-            }
-            .gal-grid img:hover {
-                transform: scale(1.02);
-                box-shadow: 0 4px 18px rgba(0,0,0,0.13);
-            }
-            .gal-grid figcaption {
-                font-size: 0.82rem;
-                color: var(--text-muted, #777);
-                text-align: center;
-                margin-top: 5px;
-                font-style: italic;
-            }
+            .lb button:hover { background: rgba(255,255,255,0.18); }
+            .lb-close { top: 12px; right: 16px; }
+            .lb-prev { left: 14px; top: 50%; transform: translateY(-50%); }
+            .lb-next { right: 14px; top: 50%; transform: translateY(-50%); }
             @media (max-width: 700px) {
-                .gal-grid, .gal-grid.three { grid-template-columns: 1fr; }
+                .lb { padding: 56px 8px 16px; }
+                .lb-prev, .lb-next { top: auto; bottom: 14px; transform: none; }
+                .lb-media img, .lb-media video { max-height: calc(100vh - 190px); }
+                .lb-cap { margin-bottom: 52px; font-size: 1.3rem; }
             }
         </style>
 </head>
@@ -132,108 +145,108 @@
                 <br>
                 <p>
                     This page is just for the sweet-eyed: pretty pictures from simulations I've run, not meant to be deeply technical.
-                    For the more technical stuff, check out the <a href="../Blogs/">blog</a>. Click any image to enlarge it.
+                    For the more technical stuff, check out the <a href="../Blogs/">blog</a>. Click anything to enlarge it, arrow keys to browse.
                 </p>
 
                 <div class="gal-grid">
                     <figure>
-                        <img src="src/fs_3.jpg" alt="Formula Student car, side view, streamlines over the rear wing">
+                        <img loading="lazy" decoding="async" src="src/fs_3.jpg" alt="Formula Student car, side view, streamlines over the rear wing">
                         <figcaption>Side view - flow over the rear wing and its wake</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_2.jpg" alt="Formula Student car, rear view, streamlines over the rear wing and wheels">
+                        <img loading="lazy" decoding="async" src="src/fs_2.jpg" alt="Formula Student car, rear view, streamlines over the rear wing and wheels">
                         <figcaption>Rear view - streamlines over the rear wing and around the rear wheels</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_4.jpg" alt="Formula Student car, rear view, streamlines above the rear wing and around the wheels">
+                        <img loading="lazy" decoding="async" src="src/fs_4.jpg" alt="Formula Student car, rear view, streamlines above the rear wing and around the wheels">
                         <figcaption>Rear view - flow leaving the rear wing and wheels</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_5.jpg" alt="Formula Student car, angled view, white streamlines">
+                        <img loading="lazy" decoding="async" src="src/fs_5.jpg" alt="Formula Student car, angled view, white streamlines">
                         <figcaption>Angled view - front wing, wheel and rear wing wakes</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_1.jpg" alt="Formula Student car, top view, streamlines and wake">
+                        <img loading="lazy" decoding="async" src="src/fs_1.jpg" alt="Formula Student car, top view, streamlines and wake">
                         <figcaption>Top view - streamlines and wake behind the car</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_6.jpg" alt="Formula Student car, top view, streamlines from the front wing to the wake">
+                        <img loading="lazy" decoding="async" src="src/fs_6.jpg" alt="Formula Student car, top view, streamlines from the front wing to the wake">
                         <figcaption>Top view - streamlines from the front wing to the wake</figcaption>
                     </figure>
                     <figure>
-                        <img src="src/fs_7.jpg" alt="Formula Student car, top view, flow approaching the front wing">
+                        <img loading="lazy" decoding="async" src="src/fs_7.jpg" alt="Formula Student car, top view, flow approaching the front wing">
                         <figcaption>Top view - flow approaching the front wing and nose</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/fs_full_car.png" alt="LES of a Formula Student car, velocity isosurfaces">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/fs_full_car.png" alt="LES of a Formula Student car, velocity isosurfaces">
                         <figcaption>LES - velocity isosurfaces</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/fs_vortices.png" alt="Formula Student car, vortex and rear wake structures">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/fs_vortices.png" alt="Formula Student car, vortex and rear wake structures">
                         <figcaption>Vortex and rear wake structures</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/fs_cornering_top.png" alt="Cornering simulation in a rotating tunnel, top view">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/fs_cornering_top.png" alt="Cornering simulation in a rotating tunnel, top view">
                         <figcaption>Cornering, rotating tunnel - top view</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/fs_cornering_streamlines_side.png" alt="Cornering simulation in a rotating tunnel, side view streamlines">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/fs_cornering_streamlines_side.png" alt="Cornering simulation in a rotating tunnel, side view streamlines">
                         <figcaption>Cornering, rotating tunnel - side view</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/fs_cornering_streamlines_rear.png" alt="Cornering simulation in a rotating tunnel, rear view streamlines">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/fs_cornering_streamlines_rear.png" alt="Cornering simulation in a rotating tunnel, rear view streamlines">
                         <figcaption>Cornering, rotating tunnel - rear view</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/rocket_top.png" alt="SLS top-down view, pressure coefficient and Schlieren">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/rocket_top.png" alt="SLS top-down view, pressure coefficient and Schlieren">
                         <figcaption>Top-down view - Cp and Schlieren</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/rocket_3d.png" alt="SLS 3D view, pressure coefficient and pressure field">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/rocket_3d.png" alt="SLS 3D view, pressure coefficient and pressure field">
                         <figcaption>3D view - Cp and pressure field</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/rocket_angled.png" alt="SLS angled view, pressure coefficient and Schlieren">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/rocket_angled.png" alt="SLS angled view, pressure coefficient and Schlieren">
                         <figcaption>Angled view - Cp and Schlieren</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/capsule_schlieren.png" alt="MSL capsule, Schlieren">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/capsule_schlieren.png" alt="MSL capsule, Schlieren">
                         <figcaption>Schlieren</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/capsule_schlieren2.png" alt="MSL capsule, Schlieren, bow shock detail">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/capsule_schlieren2.png" alt="MSL capsule, Schlieren, bow shock detail">
                         <figcaption>Schlieren - bow shock detail</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/capsule_temperature.png" alt="MSL capsule, temperature field">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/capsule_temperature.png" alt="MSL capsule, temperature field">
                         <figcaption>Temperature (K)</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/capsule_density.png" alt="MSL capsule, density ratio">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/capsule_density.png" alt="MSL capsule, density ratio">
                         <figcaption>Density ratio &rho;/&rho;<sub>&infin;</sub></figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/AMR/src/capsule_velocity.png" alt="MSL capsule, velocity magnitude ratio">
+                        <img loading="lazy" decoding="async" src="../Blogs/AMR/src/capsule_velocity.png" alt="MSL capsule, velocity magnitude ratio">
                         <figcaption>Velocity |U|/U<sub>&infin;</sub></figcaption>
                     </figure>
                     <figure>
-                        <video src="src/heptane_spray_1.mp4" autoplay muted loop playsinline controls preload="metadata"></video>
+                        <video src="src/heptane_spray_1.mp4#t=2" muted loop playsinline preload="metadata"></video><span class="gal-badge">VIDEO</span>
                         <figcaption>Droplet diameter 8-29 &mu;m, equivalence ratio up to 0.4</figcaption>
                     </figure>
                     <figure>
-                        <video src="src/heptane_spray_2.mp4" autoplay muted loop playsinline controls preload="metadata"></video>
+                        <video src="src/heptane_spray_2.mp4#t=2" muted loop playsinline preload="metadata"></video><span class="gal-badge">VIDEO</span>
                         <figcaption>Droplet diameter 3-10 &mu;m, equivalence ratio up to 0.9</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/PywebCFD/src/square.png" alt="PywebCFD square cylinder, Re 200">
+                        <img loading="lazy" decoding="async" src="../Blogs/PywebCFD/src/square.png" alt="PywebCFD square cylinder, Re 200">
                         <figcaption>Square cylinder in a channel, Re = 200</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/PywebCFD/src/naca0012_aoa5.png" alt="PywebCFD NACA 0012 at 5 degrees, Re 200">
+                        <img loading="lazy" decoding="async" src="../Blogs/PywebCFD/src/naca0012_aoa5.png" alt="PywebCFD NACA 0012 at 5 degrees, Re 200">
                         <figcaption>NACA 0012 at 5&deg;, Re = 200</figcaption>
                     </figure>
                     <figure>
-                        <img src="../Blogs/PywebCFD/src/shape_opt.png" alt="PywebCFD free-form adjoint shape optimisation">
+                        <img loading="lazy" decoding="async" src="../Blogs/PywebCFD/src/shape_opt.png" alt="PywebCFD free-form adjoint shape optimisation">
                         <figcaption>Early adjoint shape optimisation test - free-form body</figcaption>
                     </figure>
                 </div>
@@ -254,29 +267,90 @@
 
         <div id="footer">&copy; 2026 Adi Atrash</div>
 
-        <div id="imageModal" class="modal">
-            <span class="close">&times;</span>
-            <img class="modal-content" id="modalImage">
+        <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Image viewer">
+            <div class="lb-count" id="lbCount"></div>
+            <button class="lb-close" id="lbClose" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <button class="lb-prev" id="lbPrev" aria-label="Previous"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+            <button class="lb-next" id="lbNext" aria-label="Next"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+            <div class="lb-media" id="lbMedia"></div>
+            <div class="lb-cap" id="lbCap"></div>
         </div>
 
         <script>
-            const modal    = document.getElementById('imageModal');
-            const modalImg = document.getElementById('modalImage');
-            const closeBtn = document.getElementsByClassName('close')[0];
+        (() => {
+            const figs = [...document.querySelectorAll('.gal-grid figure')];
+            const lb = document.getElementById('lb'), media = document.getElementById('lbMedia');
+            const cap = document.getElementById('lbCap'), count = document.getElementById('lbCount');
+            let cur = -1, lastFocus = null;
 
-            document.querySelectorAll('.gal-grid img').forEach(img => {
-                img.addEventListener('click', function () {
-                    modal.style.display = 'block';
-                    modalImg.src = this.src;
-                    modalImg.alt = this.alt;
-                });
+            // grid videos: play on hover (mouse), play while on screen (touch)
+            const hover = matchMedia('(hover: hover)').matches;
+            figs.forEach(f => {
+                const v = f.querySelector('video');
+                if (!v) return;
+                if (hover) {
+                    f.addEventListener('mouseenter', () => v.play().catch(() => {}));
+                    f.addEventListener('mouseleave', () => v.pause());
+                } else {
+                    new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? v.play().catch(() => {}) : v.pause()),
+                        { threshold: 0.6 }).observe(v);
+                }
             });
 
-            closeBtn.addEventListener('click', () => modal.style.display = 'none');
-            modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+            function show(i) {
+                cur = (i + figs.length) % figs.length;
+                const f = figs[cur], img = f.querySelector('img'), vid = f.querySelector('video');
+                media.innerHTML = '';
+                if (vid) {
+                    const v = document.createElement('video');
+                    v.src = vid.getAttribute('src'); v.controls = true; v.autoplay = true; v.loop = true; v.muted = true; v.playsInline = true;
+                    media.appendChild(v);
+                } else {
+                    const im = document.createElement('img');
+                    im.src = img.getAttribute('src'); im.alt = img.alt;
+                    media.appendChild(im);
+                }
+                cap.innerHTML = f.querySelector('figcaption')?.innerHTML || '';
+                count.textContent = (cur + 1) + ' / ' + figs.length;
+                // preload neighbours
+                [cur + 1, cur - 1].forEach(k => { const n = figs[(k + figs.length) % figs.length].querySelector('img'); if (n) new Image().src = n.src; });
+            }
+            function open(i) {
+                lastFocus = document.activeElement;
+                figs.forEach(f => f.querySelector('video')?.pause());
+                show(i); lb.classList.add('open'); document.body.style.overflow = 'hidden';
+                document.getElementById('lbClose').focus();
+            }
+            function close() {
+                lb.classList.remove('open'); media.innerHTML = ''; document.body.style.overflow = '';
+                lastFocus?.focus();
+            }
+
+            figs.forEach((f, i) => {
+                f.tabIndex = 0;
+                f.setAttribute('role', 'button');
+                f.addEventListener('click', () => open(i));
+                f.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(i); } });
+            });
+            document.getElementById('lbClose').addEventListener('click', close);
+            document.getElementById('lbPrev').addEventListener('click', e => { e.stopPropagation(); show(cur - 1); });
+            document.getElementById('lbNext').addEventListener('click', e => { e.stopPropagation(); show(cur + 1); });
+            lb.addEventListener('click', e => { if (e.target === lb || e.target === media) close(); });
             document.addEventListener('keydown', e => {
-                if (e.key === 'Escape' && modal.style.display === 'block') modal.style.display = 'none';
+                if (!lb.classList.contains('open')) return;
+                if (e.key === 'Escape') close();
+                else if (e.key === 'ArrowRight') show(cur + 1);
+                else if (e.key === 'ArrowLeft') show(cur - 1);
             });
+            // swipe on phones
+            let x0 = null;
+            lb.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+            lb.addEventListener('touchend', e => {
+                if (x0 === null) return;
+                const dx = e.changedTouches[0].clientX - x0; x0 = null;
+                if (Math.abs(dx) > 50) show(cur + (dx < 0 ? 1 : -1));
+            });
+        })();
         </script>
 
     </body>
