@@ -8,7 +8,7 @@ const canvas = document.createElement('canvas');
 canvas.id = 'shockbg';
 canvas.setAttribute('aria-hidden', 'true');
 Object.assign(canvas.style, {
-    position: 'fixed', inset: '0', width: '100vw', height: '100vh',
+    position: 'fixed', left: '0', top: '0',
     zIndex: '-1', pointerEvents: 'none', opacity: '0', transition: 'opacity 1.2s ease'
 });
 document.body.prepend(canvas);
@@ -94,7 +94,6 @@ void main(){
 const DISP = HEAD + `
 uniform sampler2D uU, uM;
 uniform vec3 uInk; uniform float uK, uAlpha;
-uniform int uDark;
 out vec4 col;
 float rho(ivec2 p){ return texelFetch(uU, clamp(p, ivec2(0), uN-1), 0).x; }
 void main(){
@@ -108,18 +107,8 @@ void main(){
     float gy = rho(c+ivec2(0,1)) - rho(c-ivec2(0,1));
     float g = length(vec2(gx, gy))/rho(c);
     float s = 1.0 - exp(-uK*max(g - 0.012, 0.0));
-    if (uDark == 1) {
-        // colour schlieren: hue = direction of the density gradient (colour-wheel cutoff filter)
-        float h = atan(gy, gx)/6.2831853 + 0.5;
-        vec3 rgb = clamp(abs(mod(h*6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-        rgb = mix(vec3(1.0), rgb, 0.8);                   // keep it a bit pastel
-        rgb = mix(rgb, vec3(1.0), smoothstep(0.75, 1.0, s)*0.35);   // strongest gradients go hot white
-        float a = dim*uAlpha*s;
-        col = vec4(rgb*a, a);
-    } else {
-        float a = dim*uAlpha*s;
-        col = vec4(uInk*a, a);
-    }
+    float a = dim*uAlpha*s;
+    col = vec4(uInk*a, a);
 }`;
 
 function prog(fs) {
@@ -139,7 +128,7 @@ try { P = { step: prog(STEP), disp: prog(DISP) }; }
 catch (e) { console.warn('shock bg disabled:', e); canvas.remove(); return; }
 gl.bindVertexArray(gl.createVertexArray());
 
-let NX = 0, NY = 0, CELL = 4, A, S, B, maskTex, mask;
+let CH = 0, NX = 0, NY = 0, CELL = 4, A, S, B, maskTex, mask;
 const ambient = (n) => { const d = new Float32Array(n*4); for (let k = 0; k < n; k++) { d[4*k] = 1; d[4*k+3] = 1/(GAMMA-1); } return d; };
 
 function tex(fmt, ifmt, type, data, w, h) {
@@ -161,11 +150,14 @@ function freeAll() {
     if (maskTex) gl.deleteTexture(maskTex);
 }
 function setup() {
-    const w = window.innerWidth, h = window.innerHeight;
+    // on phones, extend below the fold so the strip under a hiding URL bar is still covered
+    const w = window.innerWidth, h = Math.ceil(window.innerHeight*(matchMedia('(pointer: coarse)').matches ? 1.15 : 1));
     // 2 css px cells (same look as on a phone); only coarsen on very large screens
     CELL = Math.max(2, Math.ceil(Math.sqrt(w*h/450000)));
     NX = Math.ceil(w/CELL); NY = Math.ceil(h/CELL);
     canvas.width = NX; canvas.height = NY;
+    CH = NY*CELL;
+    canvas.style.width = NX*CELL + 'px'; canvas.style.height = CH + 'px';
     freeAll();
     const amb = ambient(NX*NY);
     A = target(amb); S = target(null); B = target(amb);
@@ -182,7 +174,7 @@ let maskDirty = true;
 function buildMask() {
     mask.fill(0);
     // soft fade zones behind text (mask 1..100 = fluid, dimmed; 255 = solid wall)
-    const F = 36/CELL, H = window.innerHeight;
+    const F = 36/CELL, H = CH;
     for (const el of document.querySelectorAll(DIM_SEL)) {
         const r = el.getBoundingClientRect();
         if (r.bottom < -48 || r.top > H + 48) continue;
@@ -203,11 +195,11 @@ function buildMask() {
     for (const el of document.querySelectorAll(SOLID_SEL)) {
         const r0 = el.getBoundingClientRect(), pad = el.classList.contains('pfp') ? 0 : 8;
         const r = { left: r0.left, right: r0.right, top: r0.top - pad, bottom: r0.bottom + pad, width: r0.width };
-        if (r.bottom < 0 || r.top > window.innerHeight) continue;
+        if (r.bottom < 0 || r.top > CH) continue;
         const i0 = Math.max(0, Math.floor(r.left/CELL)), i1 = Math.min(NX-1, Math.floor(r.right/CELL));
-        const j0 = Math.max(0, Math.floor((window.innerHeight - r.bottom)/CELL)), j1 = Math.min(NY-1, Math.floor((window.innerHeight - r.top)/CELL));
+        const j0 = Math.max(0, Math.floor((CH - r.bottom)/CELL)), j1 = Math.min(NY-1, Math.floor((CH - r.top)/CELL));
         const round = el.classList.contains('pfp');
-        const cx = (r.left + r.right)/2/CELL, cy = (window.innerHeight - (r.top + r.bottom)/2)/CELL, rad = r.width/2/CELL;
+        const cx = (r.left + r.right)/2/CELL, cy = (CH - (r.top + r.bottom)/2)/CELL, rad = r.width/2/CELL;
         const ring = 14/CELL;
         for (let j = Math.max(0, j0 - Math.ceil(ring)); j <= Math.min(NY-1, j1 + Math.ceil(ring)); j++)
             for (let i = Math.max(0, i0 - Math.ceil(ring)); i <= Math.min(NX-1, i1 + Math.ceil(ring)); i++) {
@@ -250,10 +242,8 @@ function draw() {
     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
     bind(pr, 'uU', 0, A.t); bind(pr, 'uM', 1, maskTex);
     gl.uniform2i(pr.u.uN, NX, NY);
-    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-    gl.uniform1i(pr.u.uDark, dark ? 1 : 0);
     gl.uniform3f(pr.u.uInk, 0.12, 0.14, 0.18);
-    gl.uniform1f(pr.u.uK, 12.0); gl.uniform1f(pr.u.uAlpha, dark ? 0.9 : 0.65);
+    gl.uniform1f(pr.u.uK, 12.0); gl.uniform1f(pr.u.uAlpha, 0.65);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
